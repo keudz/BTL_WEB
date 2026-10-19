@@ -1,0 +1,112 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\school\\lap-trinh-web\\BTL_WEB\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|d:\\school\\lap-trinh-web\\btl_web\\kit_database_full_script.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}",
+      "RelativeMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|solutionrelative:kit_database_full_script.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|d:\\school\\lap-trinh-web\\btl_web\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|d:\\school\\lap-trinh-web\\btl_web\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|solutionrelative:views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|d:\\school\\lap-trinh-web\\btl_web\\views\\reports\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|solutionrelative:views\\reports\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|d:\\school\\lap-trinh-web\\btl_web\\views\\account\\accessdenied.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|solutionrelative:views\\account\\accessdenied.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|d:\\school\\lap-trinh-web\\btl_web\\kit_database_full_script.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame",
+      "RelativeMoniker": "D:0:0:{B41A3449-4BCE-F9B6-30FD-803989634CBF}|BTL_WEB.csproj|solutionrelative:kit_database_full_script.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "KIT_Database_Full_Script.sql ",
+              "DocumentMoniker": "D:\\school\\lap-trinh-web\\BTL_WEB\\KIT_Database_Full_Script.sql",
+              "RelativeDocumentMoniker": "KIT_Database_Full_Script.sql",
+              "ToolTip": "D:\\school\\lap-trinh-web\\BTL_WEB\\KIT_Database_Full_Script.sql",
+              "RelativeToolTip": "KIT_Database_Full_Script.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-10-19T10:29:20.125Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAG0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-19T09:33:11.28Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Privacy.cshtml",
+              "DocumentMoniker": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Home\\Privacy.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Privacy.cshtml",
+              "ToolTip": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Home\\Privacy.cshtml",
+              "RelativeToolTip": "Views\\Home\\Privacy.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-19T09:33:11.627Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Reports\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Reports\\Index.cshtml",
+              "ToolTip": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Reports\\Index.cshtml",
+              "RelativeToolTip": "Views\\Reports\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-19T09:32:58.125Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AccessDenied.cshtml",
+              "DocumentMoniker": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Account\\AccessDenied.cshtml",
+              "RelativeDocumentMoniker": "Views\\Account\\AccessDenied.cshtml",
+              "ToolTip": "D:\\school\\lap-trinh-web\\BTL_WEB\\Views\\Account\\AccessDenied.cshtml",
+              "RelativeToolTip": "Views\\Account\\AccessDenied.cshtml",
+              "ViewState": "AgIAACMAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-13T17:43:27.777Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

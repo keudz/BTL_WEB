@@ -1,0 +1,550 @@
+@{
+    ViewData["Title"] = "Nhật ký Dinh dưỡng & Calo";
+    string selectedDate = ViewBag.SelectedDate ?? DateTime.UtcNow.ToString("yyyy-MM-dd");
+}
+
+<div class="container py-4">
+    <!-- Header & Date Navigation -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold mb-1">📖 Nhật ký Ăn uống Thông minh</h3>
+            <p class="text-muted small mb-0">Theo dõi năng lượng nạp vào và nhận phản hồi trực quan từ Đèn Giao Thông</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-secondary rounded-circle" id="prevDayBtn" title="Hôm trước">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <input type="date" id="logDateInput" class="form-control form-control-sm fw-bold text-center rounded-3" 
+                   value="@selectedDate" style="width: 160px;" />
+            <button class="btn btn-sm btn-outline-secondary rounded-circle" id="nextDayBtn" title="Hôm sau">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            <button class="btn btn-sm btn-light border rounded-pill px-3" id="todayBtn">Hôm nay</button>
+        </div>
+    </div>
+
+    <!-- Alert Cảnh báo Tỷ lệ Món/Bữa ĐỎ -->
+    <div id="redRatioAlert" class="alert alert-danger d-none rounded-4 border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="fs-2 text-danger">⚠️</div>
+            <div>
+                <h6 class="fw-bold mb-1 text-danger">Cảnh báo: Tỷ lệ năng lượng từ món Đỏ vượt quá 40%!</h6>
+                <div class="small text-danger-emphasis">
+                    Hôm nay bạn đang nạp nhiều thực phẩm giàu năng lượng, dầu mỡ hoặc đường. Hãy bổ sung thêm các món nhóm 🟢 Xanh (rau xanh, canh thanh đạm, ức gà luộc) để cân bằng đường ruột và duy trì thâm hụt calo!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khối Tổng quan Calo & Macro (Wao Inspired Dashboard) -->
+    <div class="kit-card p-4 p-md-4 mb-4 shadow-sm border-0 position-relative overflow-hidden" 
+         style="background: linear-gradient(145deg, #ffffff 0%, #fbfdfc 100%);">
+        <div class="row align-items-center g-4">
+            <!-- Vòng tròn Calo Trọng tâm (Wao Circular Gauge) -->
+            <div class="col-lg-5 col-xl-4 text-center">
+                <div class="wao-circle-wrapper">
+                    <svg class="wao-circle-svg" viewBox="0 0 180 180">
+                        <circle class="wao-circle-bg" cx="90" cy="90" r="70" />
+                        <circle id="waoCircleProgress" class="wao-circle-progress" cx="90" cy="90" r="70" 
+                                stroke-dasharray="439.82" stroke-dashoffset="439.82" />
+                    </svg>
+                    <div class="wao-circle-content">
+                        <span class="small text-muted fw-bold text-uppercase d-block" style="letter-spacing: 0.5px; font-size: 0.75rem;">Calo còn lại</span>
+                        <div class="display-6 fw-extrabold my-1" id="remainingCalories">0</div>
+                        <span class="badge bg-light text-muted border px-2 py-0 fw-semibold" style="font-size: 0.75rem;">kcal</span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-3 pt-2 border-top">
+                    <div class="small">
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Mục tiêu</span>
+                        <strong class="text-dark" id="targetCalories">0</strong> <span class="text-muted" style="font-size: 0.7rem;">kcal</span>
+                    </div>
+                    <div class="vr"></div>
+                    <div class="small">
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Đã nạp</span>
+                        <strong class="text-success" id="consumedCalories">0</strong> <span class="text-muted" style="font-size: 0.7rem;">kcal</span>
+                    </div>
+                    <div class="vr"></div>
+                    <div class="small">
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Đã đạt</span>
+                        <strong class="text-primary" id="calorieProgressText">0%</strong>
+                    </div>
+                </div>
+                <!-- Hidden progress bar for legacy script compatibility -->
+                <div class="kit-progress-wrapper d-none">
+                    <div id="calorieProgressBar" class="kit-progress-fill bg-success" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- 3 Thẻ Macronutrients (Carb, Protein, Fat - Chuẩn Wao) -->
+            <div class="col-lg-7 col-xl-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
+                        <i class="bi bi-pie-chart-fill me-1 text-success"></i> Tỉ lệ 3 chất Đa lượng (Macros)
+                    </span>
+                    <span class="badge bg-light text-muted border small">Hấp thụ trong ngày</span>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Carb -->
+                    <div class="col-sm-4">
+                        <div class="macro-card macro-card-carb h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">🍚 Tinh bột (Carb)</span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-1 my-1">
+                                <h4 class="fw-extrabold mb-0" id="totalCarbs">0g</h4>
+                                <span class="small text-muted" id="carbTargetText" style="font-size: 0.75rem;">/ 250g</span>
+                            </div>
+                            <div class="macro-progress-track">
+                                <div id="carbProgressBar" class="macro-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Protein -->
+                    <div class="col-sm-4">
+                        <div class="macro-card macro-card-protein h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">🥩 Đạm (Protein)</span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-1 my-1">
+                                <h4 class="fw-extrabold mb-0" id="totalProtein">0g</h4>
+                                <span class="small text-muted" id="proteinTargetText" style="font-size: 0.75rem;">/ 110g</span>
+                            </div>
+                            <div class="macro-progress-track">
+                                <div id="proteinProgressBar" class="macro-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fat -->
+                    <div class="col-sm-4">
+                        <div class="macro-card macro-card-fat h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">🥑 Chất béo (Fat)</span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-1 my-1">
+                                <h4 class="fw-extrabold mb-0" id="totalFat">0g</h4>
+                                <span class="small text-muted" id="fatTargetText" style="font-size: 0.75rem;">/ 55g</span>
+                            </div>
+                            <div class="macro-progress-track">
+                                <div id="fatProgressBar" class="macro-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Tip -->
+                <div class="mt-3 p-2 px-3 rounded-3 bg-light text-muted small d-flex align-items-center gap-2" style="font-size: 0.8rem;">
+                    <i class="bi bi-info-circle text-success fs-6"></i>
+                    <span>Tỷ lệ chuẩn cho người Việt: <strong>50% Carb</strong> &bull; <strong>25% Protein</strong> &bull; <strong>25% Fat</strong> để giữ vóc dáng bền vững.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Khối Bữa Ăn: Sáng, Trưa, Tối, Ăn Vặt -->
+    <div class="row g-4" id="mealsContainer">
+        <!-- Render động qua JavaScript -->
+    </div>
+</div>
+
+<!-- Modal Thêm Món Vào Bữa Ăn -->
+<div class="modal fade" id="addMealItemModal" tabindex="-1" aria-labelledby="addMealItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <div>
+                    <h5 class="modal-title fw-bold" id="addMealItemModalLabel">Thêm món ăn vào bữa</h5>
+                    <div class="text-muted small" id="modalMealSubtitle">Chọn món từ thư viện hoặc tự tạo</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Search input -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="modalFoodSearch" class="form-control border-start-0" 
+                           placeholder="Gõ tên món để tìm (phở bò, cơm tấm, bánh mì...)" />
+                </div>
+
+                <!-- Food Results List -->
+                <div class="overflow-auto border rounded-3 p-2 mb-3" style="max-height: 280px;" id="modalFoodList">
+                    <div class="text-center py-4 text-muted small">Hãy gõ tên món để tìm kiếm...</div>
+                </div>
+
+                <!-- Selected Food Config -->
+                <div id="selectedFoodSection" class="p-3 bg-light rounded-3 d-none border">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong id="selectedFoodName" class="text-dark">Tên món</strong>
+                            <span class="badge bg-secondary ms-2" id="selectedFoodServing">1 phần</span>
+                        </div>
+                        <span id="selectedFoodCalories" class="fw-bold text-success">0 kcal</span>
+                    </div>
+
+                    <div class="row align-items-center g-2 mt-2">
+                        <div class="col-sm-5">
+                            <label class="form-label small fw-semibold text-muted mb-0">Khẩu phần/Số lượng:</label>
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="input-group input-group-sm">
+                                <button class="btn btn-outline-secondary" type="button" onclick="adjustQuantity(-0.5)">-0.5</button>
+                                <input type="number" step="0.5" min="0.1" max="20" class="form-control text-center fw-bold" 
+                                       id="itemQuantityInput" value="1.0" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="adjustQuantity(0.5)">+0.5</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-kit-primary px-4" id="confirmAddFoodBtn" disabled>
+                    <i class="bi bi-plus-lg me-1"></i> Thêm vào bữa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentDate = "@selectedDate";
+        let activeMealType = "Breakfast";
+        let selectedFood = null;
+        let searchTimeout = null;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadSummary();
+
+            // Date picker listener
+            const dateInput = document.getElementById("logDateInput");
+            dateInput.addEventListener("change", function () {
+                currentDate = this.value;
+                loadSummary();
+            });
+
+            document.getElementById("todayBtn").addEventListener("click", function () {
+                currentDate = new Date().toISOString().split('T')[0];
+                dateInput.value = currentDate;
+                loadSummary();
+            });
+
+            document.getElementById("prevDayBtn").addEventListener("click", function () {
+                changeDate(-1);
+            });
+
+            document.getElementById("nextDayBtn").addEventListener("click", function () {
+                changeDate(1);
+            });
+
+            // Food search in modal
+            document.getElementById("modalFoodSearch").addEventListener("input", function (e) {
+                clearTimeout(searchTimeout);
+                const q = e.target.value.trim();
+                searchTimeout = setTimeout(() => searchModalFoods(q), 250);
+            });
+
+            // Confirm Add Food
+            document.getElementById("confirmAddFoodBtn").addEventListener("click", addFoodToMeal);
+        });
+
+        function changeDate(days) {
+            const d = new Date(currentDate);
+            d.setDate(d.getDate() + days);
+            currentDate = d.toISOString().split('T')[0];
+            document.getElementById("logDateInput").value = currentDate;
+            loadSummary();
+        }
+
+        // Tải toàn bộ dữ liệu nhật ký ngày hiện tại qua REST API
+        async function loadSummary() {
+            try {
+                const res = await fetch(`/api/dailylogapi/summary?date=${currentDate}`);
+                if (!res.ok) {
+                    if (res.status === 401) window.location.href = "/Account/Login";
+                    return;
+                }
+                const data = await res.json();
+                if (!data.success) return;
+
+                // Cập nhật Header tiến trình
+                document.getElementById("consumedCalories").textContent = data.totalConsumedCalories;
+                document.getElementById("targetCalories").textContent = data.targetDailyCalories;
+                
+                const remEl = document.getElementById("remainingCalories");
+                remEl.textContent = data.remainingCalories;
+                remEl.className = data.remainingCalories >= 0 ? "display-6 fw-extrabold my-1 text-success" : "display-6 fw-extrabold my-1 text-danger";
+
+                document.getElementById("calorieProgressText").textContent = `${data.progressPercent}%`;
+
+                // Cập nhật Vòng tròn Calo SVG (Wao Circular Gauge)
+                const circleProgress = document.getElementById("waoCircleProgress");
+                if (circleProgress) {
+                    const circumference = 439.82; // 2 * PI * 70
+                    const percent = Math.min(100, Math.max(0, data.progressPercent));
+                    const offset = circumference - (percent / 100) * circumference;
+                    circleProgress.style.strokeDashoffset = offset;
+
+                    if (data.progressPercent > 100) {
+                        circleProgress.style.stroke = "#ef4444"; // Đỏ (Vượt)
+                    } else if (data.progressPercent >= 85) {
+                        circleProgress.style.stroke = "#f59e0b"; // Vàng (Sắp đủ)
+                    } else {
+                        circleProgress.style.stroke = "#10b981"; // Xanh (Lý tưởng)
+                    }
+                }
+
+                // Cập nhật 3 thanh Macro đa lượng (Carb, Protein, Fat)
+                document.getElementById("totalProtein").textContent = `${data.totalProtein}g`;
+                document.getElementById("totalCarbs").textContent = `${data.totalCarbs}g`;
+                document.getElementById("totalFat").textContent = `${data.totalFat}g`;
+
+                // Mục tiêu ước tính theo chuẩn 50% Carb - 25% Protein - 25% Fat
+                const carbTarget = Math.round((data.targetDailyCalories * 0.50) / 4);
+                const proteinTarget = Math.round((data.targetDailyCalories * 0.25) / 4);
+                const fatTarget = Math.round((data.targetDailyCalories * 0.25) / 9);
+
+                document.getElementById("carbTargetText").textContent = `/ ${carbTarget}g`;
+                document.getElementById("proteinTargetText").textContent = `/ ${proteinTarget}g`;
+                document.getElementById("fatTargetText").textContent = `/ ${fatTarget}g`;
+
+                const carbPct = carbTarget > 0 ? Math.min(100, Math.round((data.totalCarbs / carbTarget) * 100)) : 0;
+                const proteinPct = proteinTarget > 0 ? Math.min(100, Math.round((data.totalProtein / proteinTarget) * 100)) : 0;
+                const fatPct = fatTarget > 0 ? Math.min(100, Math.round((data.totalFat / fatTarget) * 100)) : 0;
+
+                document.getElementById("carbProgressBar").style.width = `${carbPct}%`;
+                document.getElementById("proteinProgressBar").style.width = `${proteinPct}%`;
+                document.getElementById("fatProgressBar").style.width = `${fatPct}%`;
+
+                // Cảnh báo Đỏ (Gamification)
+                const alertEl = document.getElementById("redRatioAlert");
+                if (data.isRedWarning) {
+                    alertEl.classList.remove("d-none");
+                    alertEl.classList.add("pulse-warning");
+                } else {
+                    alertEl.classList.add("d-none");
+                    alertEl.classList.remove("pulse-warning");
+                }
+
+                // Render 4 Bữa Ăn
+                renderMeals(data.meals);
+
+            } catch (err) {
+                toastr.error("Lỗi khi tải dữ liệu nhật ký.");
+            }
+        }
+
+        function renderMeals(meals) {
+            const container = document.getElementById("mealsContainer");
+            container.innerHTML = "";
+
+            const mealEmojis = {
+                "Breakfast": "🍳",
+                "Lunch": "🍲",
+                "Dinner": "🥗",
+                "Snack": "🍎"
+            };
+
+            meals.forEach(m => {
+                let tlBadge = "badge-tl-green";
+                let tlText = "🟢 Xanh";
+                if (m.mealTrafficLightDynamic === "YELLOW") {
+                    tlBadge = "badge-tl-yellow";
+                    tlText = "🟡 Vàng";
+                } else if (m.mealTrafficLightDynamic === "RED") {
+                    tlBadge = "badge-tl-red";
+                    tlText = "🔴 Đỏ";
+                }
+
+                let itemsHtml = "";
+                if (m.items.length === 0) {
+                    itemsHtml = `
+                        <div class="text-center py-4 text-muted small">
+                            <span class="fs-4 d-block mb-1 opacity-50">${mealEmojis[m.mealType] || '🍽️'}</span>
+                            Chưa có món ăn nào trong bữa này.
+                        </div>
+                    `;
+                } else {
+                    itemsHtml = `<div class="d-flex flex-column gap-1">`;
+                    m.items.forEach(item => {
+                        let staticDot = item.foodStaticLight === "GREEN" ? "🟢" : (item.foodStaticLight === "YELLOW" ? "🟡" : "🔴");
+                        itemsHtml += `
+                            <div class="meal-food-item d-flex justify-content-between align-items-center">
+                                <div class="me-2">
+                                    <div class="fw-semibold small text-dark">
+                                        ${staticDot} ${item.foodName}
+                                        ${item.isAiEstimated ? '<span class="badge bg-warning-subtle text-warning small ms-1" style="font-size: 0.65rem;">AI Scan</span>' : ''}
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        ${item.quantity} x ${item.servingSize} &bull; <span class="text-primary">P:${item.calculatedProtein}g</span> &bull; <span class="text-warning-emphasis">C:${item.calculatedCarbs}g</span> &bull; <span class="text-danger">F:${item.calculatedFat}g</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold small text-dark">${item.calculatedCalories} kcal</span>
+                                    <button class="btn btn-sm btn-link text-danger p-0" onclick="removeItem(${item.id})" title="Xóa món">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    itemsHtml += `</div>`;
+                }
+
+                const cardHtml = `
+                    <div class="col-md-6">
+                        <div class="meal-section-card h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="meal-header d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fs-4">${mealEmojis[m.mealType] || '🍽️'}</span>
+                                        <div>
+                                            <h5 class="fw-bold mb-0 text-dark">${m.mealName}</h5>
+                                            <span class="small text-muted fw-semibold">${m.mealCalories} kcal</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge ${tlBadge} px-3 py-1 rounded-pill small">${tlText}</span>
+                                </div>
+
+                                <div class="meal-body">
+                                    ${itemsHtml}
+                                </div>
+                            </div>
+
+                            <div class="p-3 pt-0">
+                                <button class="btn btn-sm btn-outline-success w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-1 shadow-sm" 
+                                        onclick="openAddModal('${m.mealType}', '${m.mealName}')">
+                                    <i class="bi bi-plus-lg"></i> Thêm món vào ${m.mealName}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML("beforeend", cardHtml);
+            });
+        }
+
+        // Mở modal thêm món
+        function openAddModal(mealType, mealName) {
+            activeMealType = mealType;
+            document.getElementById("modalMealSubtitle").textContent = `Đang thêm món cho: ${mealName}`;
+            document.getElementById("modalFoodSearch").value = "";
+            document.getElementById("selectedFoodSection").classList.add("d-none");
+            document.getElementById("confirmAddFoodBtn").disabled = true;
+            selectedFood = null;
+            searchModalFoods("");
+            new bootstrap.Modal(document.getElementById("addMealItemModal")).show();
+        }
+
+        // Tìm món trong modal
+        async function searchModalFoods(q) {
+            const listEl = document.getElementById("modalFoodList");
+            listEl.innerHTML = `<div class="text-center py-3 text-muted small"><div class="spinner-border spinner-border-sm text-success me-1"></div>Đang tìm...</div>`;
+
+            try {
+                const res = await fetch(`/api/foodapi/search?query=${encodeURIComponent(q)}&pageSize=8`);
+                const data = await res.json();
+
+                if (!data.success || data.items.length === 0) {
+                    listEl.innerHTML = `<div class="text-center py-3 text-muted small">Không tìm thấy món ăn nào.</div>`;
+                    return;
+                }
+
+                listEl.innerHTML = "";
+                data.items.forEach(f => {
+                    let dot = f.trafficLightStatic === "GREEN" ? "🟢" : (f.trafficLightStatic === "YELLOW" ? "🟡" : "🔴");
+                    const itemDiv = document.createElement("div");
+                    itemDiv.className = "p-2 rounded-2 border-bottom d-flex justify-content-between align-items-center modal-food-row cursor-pointer";
+                    itemDiv.style.cursor = "pointer";
+                    itemDiv.innerHTML = `
+                        <div>
+                            <div class="fw-semibold small">${dot} ${f.name}</div>
+                            <div class="small text-muted" style="font-size: 0.75rem;">${f.servingSize} &bull; P:${f.protein}g C:${f.carbs}g F:${f.fat}g</div>
+                        </div>
+                        <span class="badge bg-light text-dark fw-bold">${f.calories} kcal</span>
+                    `;
+                    itemDiv.onclick = () => selectFoodForModal(f);
+                    listEl.appendChild(itemDiv);
+                });
+            } catch (err) {
+                listEl.innerHTML = `<div class="text-danger small text-center py-2">Lỗi tải dữ liệu món ăn</div>`;
+            }
+        }
+
+        function selectFoodForModal(food) {
+            selectedFood = food;
+            document.getElementById("selectedFoodSection").classList.remove("d-none");
+            document.getElementById("selectedFoodName").textContent = food.name;
+            document.getElementById("selectedFoodServing").textContent = food.servingSize;
+            document.getElementById("selectedFoodCalories").textContent = `${food.calories} kcal`;
+            document.getElementById("itemQuantityInput").value = "1.0";
+            document.getElementById("confirmAddFoodBtn").disabled = false;
+        }
+
+        function adjustQuantity(delta) {
+            const input = document.getElementById("itemQuantityInput");
+            let val = parseFloat(input.value) || 1.0;
+            val = Math.max(0.1, Math.min(20, val + delta));
+            input.value = val.toFixed(1);
+            if (selectedFood) {
+                document.getElementById("selectedFoodCalories").textContent = `${Math.round(selectedFood.calories * val)} kcal`;
+            }
+        }
+
+        // Gửi AJAX POST thêm món
+        async function addFoodToMeal() {
+            if (!selectedFood) return;
+            const qty = parseFloat(document.getElementById("itemQuantityInput").value) || 1.0;
+
+            const payload = {
+                date: currentDate,
+                mealType: activeMealType,
+                foodId: selectedFood.Id || selectedFood.id,
+                quantity: qty,
+                isAiEstimated: false
+            };
+
+            try {
+                const res = await fetch("/api/dailylogapi/add-item", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    toastr.success(`Đã thêm ${selectedFood.name || selectedFood.Name}!`);
+                    bootstrap.Modal.getInstance(document.getElementById("addMealItemModal")).hide();
+                    loadSummary();
+                } else {
+                    toastr.error("Không thể thêm món ăn.");
+                }
+            } catch (err) {
+                toastr.error("Lỗi kết nối máy chủ.");
+            }
+        }
+
+        // Gửi AJAX DELETE xóa món
+        async function removeItem(logItemId) {
+            if (!confirm("Bạn có chắc muốn xóa món này khỏi bữa ăn?")) return;
+
+            try {
+                const res = await fetch(`/api/dailylogapi/remove-item/${logItemId}`, {
+                    method: "DELETE"
+                });
+
+                if (res.ok) {
+                    toastr.info("Đã xóa món ăn khỏi bữa.");
+                    loadSummary();
+                } else {
+                    toastr.error("Không thể xóa món ăn.");
+                }
+            } catch (err) {
+                toastr.error("Lỗi kết nối máy chủ.");
+            }
+        }
+    </script>
+}

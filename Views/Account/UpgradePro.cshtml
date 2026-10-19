@@ -1,0 +1,134 @@
+@model BTL_WEB.Models.Entities.User
+@{
+    ViewData["Title"] = "Nâng cấp Gói PRO VIP";
+    bool isAlreadyPro = Model.Role == "Pro";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+            <!-- Header Hero -->
+            <div class="text-center mb-4">
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm">
+                    ✨ TRẢI NGHIỆM ĐỈNH CAO DINH DƯỠNG THÔNG MINH
+                </span>
+                <h2 class="fw-extrabold text-dark mt-2">Nâng Cấp Gói <span class="text-warning">PRO VIP</span></h2>
+                <p class="text-muted col-md-10 mx-auto">
+                    Mở khóa tính năng nhận diện ảnh mâm cơm bằng AI Gemini, tự động trích xuất calo và toàn quyền quản trị cơ sở dữ liệu món ăn.
+                </p>
+            </div>
+
+            @if (isAlreadyPro)
+            {
+                <div class="kit-card p-5 text-center shadow-sm border-top border-4 border-warning mb-4">
+                    <div class="display-3 text-warning mb-2">👑</div>
+                    <h3 class="fw-bold text-dark">Tài Khoản Của Bạn Đã Là PRO VIP!</h3>
+                    <p class="text-muted col-md-8 mx-auto mb-4">
+                        Bạn đang sở hữu trọn vẹn toàn bộ tính năng cao cấp nhất của hệ thống KIT Calorie. Hãy bắt đầu quét ảnh và kiểm soát dinh dưỡng ngay.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-controller="AiScanner" asp-action="Index" class="btn btn-warning px-4 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-camera-fill me-1"></i> Mở Trợ Lý AI Vision
+                        </a>
+                        <a asp-controller="DailyLog" asp-action="Index" class="btn btn-kit-primary px-4 py-2 fw-bold">
+                            <i class="bi bi-journal-check me-1"></i> Nhật ký hôm nay
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Comparison Cards -->
+                <div class="row g-4 mb-4">
+                    <!-- Free Plan -->
+                    <div class="col-md-6">
+                        <div class="kit-card p-4 h-100 shadow-sm border">
+                            <div class="small fw-bold text-muted text-uppercase mb-1">Gói Hiện Tại</div>
+                            <h4 class="fw-bold text-dark">🌱 Gói Miễn Phí (Free)</h4>
+                            <div class="display-6 fw-bold text-muted my-2">0đ <span class="fs-6 text-muted fw-normal">/ vĩnh viễn</span></div>
+                            <p class="small text-muted mb-3">Dành cho người dùng theo dõi cơ bản</p>
+
+                            <hr class="my-3 text-muted" />
+
+                            <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Tra cứu hơn 35+ món ăn chuẩn</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Ghi nhật ký dinh dưỡng 4 bữa</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Tủ lạnh ảo & cảnh báo hết hạn</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Theo dõi tiến trình cân nặng & Calo</li>
+                                <li class="text-muted text-decoration-line-through"><i class="bi bi-x-circle text-muted me-2"></i>Nhận diện mâm cơm qua AI Vision</li>
+                                <li class="text-muted text-decoration-line-through"><i class="bi bi-x-circle text-muted me-2"></i>Quản trị thư viện món ăn</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Pro VIP Plan -->
+                    <div class="col-md-6">
+                        <div class="kit-card p-4 h-100 shadow-sm border-2 border-warning position-relative" style="background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);">
+                            <div class="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 rounded-bottom-start small fw-bold">
+                                KHUYÊN DÙNG
+                            </div>
+                            <div class="small fw-bold text-warning text-uppercase mb-1">Trải Nghiệm Cao Cấp</div>
+                            <h4 class="fw-bold text-dark">👑 Gói PRO VIP</h4>
+                            <div class="display-6 fw-bold text-warning my-2">49.000đ <span class="fs-6 text-muted fw-normal">/ tháng</span></div>
+                            <p class="small text-muted mb-3">Tối ưu thời gian, kiểm soát dinh dưỡng chính xác 100%</p>
+
+                            <hr class="my-3 text-muted" />
+
+                            <ul class="list-unstyled small d-flex flex-column gap-2 mb-4">
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Toàn bộ tính năng</strong> gói Miễn Phí</li>
+                                <li><i class="bi bi-stars text-warning me-2"></i><strong>AI Gemini Vision:</strong> Quét ảnh mâm cơm</li>
+                                <li><i class="bi bi-stars text-warning me-2"></i><strong>AI Scanner:</strong> Tự động bóc tách nguyên liệu</li>
+                                <li><i class="bi bi-shield-check text-success me-2"></i><strong>Quản lý Thư viện:</strong> Thêm, sửa món ăn</li>
+                                <li><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Không giới hạn số lần tính toán calo</li>
+                            </ul>
+
+                            <!-- 1-Click Activate Demo Button -->
+                            <form asp-action="ActivateProDemo" method="post" class="mt-auto">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-warning w-100 py-2 fw-bold text-dark shadow-sm">
+                                    <i class="bi bi-lightning-fill me-1"></i> Kích hoạt PRO ngay (Demo chấm thi)
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fake VietQR Payment Section for Ultra-Realistic Demo -->
+                <div class="kit-card p-4 shadow-sm">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-qr-code-scan text-primary me-2"></i>Giả Lập Thanh Toán Chuyển Khoản Qua VietQR</h5>
+                    <div class="row align-items-center g-4">
+                        <div class="col-md-4 text-center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=2|99|0987654321|KIT_CALORIE_PRO_VIP|49000|0|0" 
+                                 alt="VietQR Demo" 
+                                 class="img-fluid rounded-3 border p-2 bg-white shadow-sm" style="max-width: 170px;" />
+                            <div class="small text-muted mt-2">Mã QR Thanh Toán Tự Động</div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="bg-light p-3 rounded-3 small mb-3">
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Ngân hàng thụ hưởng:</span>
+                                    <strong class="text-dark">MB Bank (Quân Đội)</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Số tài khoản:</span>
+                                    <strong class="text-primary font-monospace">0987654321</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Chủ tài khoản:</span>
+                                    <strong class="text-dark">KIT CALORIE ASSISTANT</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Nội dung chuyển khoản:</span>
+                                    <strong class="text-danger font-monospace">KIT PRO @Model.Username.ToUpper()</strong>
+                                </div>
+                            </div>
+                            <div class="alert alert-info py-2 px-3 small border-0 mb-0">
+                                💡 <em>Khi thuyết trình trước giảng viên, bạn chỉ cần bấm nút <strong>"Kích hoạt PRO ngay (Demo chấm thi)"</strong> ở trên để hệ thống tự động nâng cấp Role vào Cơ sở dữ liệu và mở khóa toàn bộ tính năng!</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

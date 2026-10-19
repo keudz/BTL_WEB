@@ -1,0 +1,316 @@
+@{
+    ViewData["Title"] = "Tủ Lạnh Ảo - Trợ Lý Chống Lãng Phí";
+}
+
+<div class="container py-4">
+    <!-- Header & Action -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-snow text-info me-2"></i>Tủ Lạnh Ảo & Chống Lãng Phí Thực Phẩm</h3>
+            <p class="text-muted small mb-0">Quản lý hạn sử dụng nguyên liệu, nhận cảnh báo hết hạn & gợi ý công thức chế biến</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#notificationModal">
+                <i class="bi bi-bell-fill me-1"></i> Thông báo & Gợi ý
+            </button>
+            <button class="btn btn-kit-primary" data-bs-toggle="modal" data-bs-target="#addFridgeItemModal">
+                <i class="bi bi-plus-lg me-1"></i> Thêm thực phẩm vào tủ
+            </button>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+            <div class="kit-card p-3 border-start border-4 border-primary">
+                <div class="small text-muted fw-semibold">Tổng nguyên liệu trữ</div>
+                <h3 class="fw-bold text-dark mb-0 mt-1" id="statTotalItems">0</h3>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="kit-card p-3 border-start border-4 border-warning">
+                <div class="small text-muted fw-semibold">Sắp hết hạn (≤ 48 giờ)</div>
+                <h3 class="fw-bold text-warning mb-0 mt-1" id="statExpiringSoon">0</h3>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="kit-card p-3 border-start border-4 border-success">
+                <div class="small text-muted fw-semibold">Trạng thái bảo quản</div>
+                <h5 class="fw-bold text-success mb-0 mt-1">Đang kiểm soát</h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="kit-card p-3 mb-4">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="small fw-bold text-muted me-2">Phân loại:</span>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill active cat-filter-btn" data-cat="ALL">Tất cả</button>
+            <button class="btn btn-sm btn-outline-success rounded-pill cat-filter-btn" data-cat="Vegetable">🥦 Rau củ quả</button>
+            <button class="btn btn-sm btn-outline-danger rounded-pill cat-filter-btn" data-cat="MeatFish">🥩 Thịt & Cá tươi</button>
+            <button class="btn btn-sm btn-outline-warning rounded-pill cat-filter-btn" data-cat="Dairy">🥛 Sữa & Trứng</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill cat-filter-btn" data-cat="Other">📦 Khác</button>
+        </div>
+    </div>
+
+    <!-- Fridge Items List -->
+    <div class="row g-3" id="fridgeItemsContainer">
+        <!-- Render động bằng AJAX -->
+    </div>
+</div>
+
+<!-- Modal Thêm thực phẩm vào tủ -->
+<div class="modal fade" id="addFridgeItemModal" tabindex="-1" aria-labelledby="addFridgeItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addFridgeItemModalLabel">❄️ Thêm nguyên liệu vào Tủ lạnh ảo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addFridgeItemForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Tên nguyên liệu/thực phẩm <span class="text-danger">*</span></label>
+                        <input type="text" id="fridgeItemName" class="form-control" required placeholder="VD: Cá hồi phi lê, Rau cải ngọt, Trứng gà..." />
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Nhóm thực phẩm</label>
+                            <select id="fridgeCategory" class="form-select">
+                                <option value="Vegetable">Rau củ quả (~3-5 ngày)</option>
+                                <option value="MeatFish">Thịt / Cá tươi (~2-3 ngày)</option>
+                                <option value="Dairy">Sữa / Trứng (~7-14 ngày)</option>
+                                <option value="Fruit">Trái cây (~5 ngày)</option>
+                                <option value="Other">Khác</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Số lượng & Đơn vị</label>
+                            <div class="input-group">
+                                <input type="number" step="0.1" id="fridgeQuantity" class="form-control" value="1.0" required />
+                                <input type="text" id="fridgeUnit" class="form-control" placeholder="kg/bó/hộp" value="kg" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Hạn dùng (Số ngày còn lại)</label>
+                            <input type="number" id="fridgeExpiryDays" class="form-control" value="3" min="1" max="365" />
+                            <div class="small text-muted" style="font-size: 0.72rem;">* Hệ thống tự tính ngày hết hạn</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Ước tính giá mua (VNĐ)</label>
+                            <input type="number" id="fridgeEstimatedCost" class="form-control" placeholder="50000" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-kit-primary w-100 py-2">
+                        <i class="bi bi-save me-1"></i> Lưu vào Tủ Lạnh
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thông báo Cảnh báo Hạn & Gợi ý Công thức -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="notificationModalLabel">🔔 Cảnh báo từ Hệ thống Quét Tủ Lạnh Ngầm (Cron Job)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Tác vụ chạy ngầm định kỳ quét các nguyên liệu có hạn sử dụng ≤ 48 giờ để chống lãng phí:</p>
+                <div class="overflow-auto" style="max-height: 400px;" id="notificationsList">
+                    <!-- Render động -->
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentCategory = "ALL";
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadFridgeItems();
+            loadNotifications();
+
+            // Category filter
+            document.querySelectorAll(".cat-filter-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    document.querySelectorAll(".cat-filter-btn").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                    currentCategory = this.getAttribute("data-cat");
+                    loadFridgeItems();
+                });
+            });
+
+            // Form submit
+            document.getElementById("addFridgeItemForm").addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const data = {
+                    itemName: document.getElementById("fridgeItemName").value,
+                    category: document.getElementById("fridgeCategory").value,
+                    quantity: parseFloat(document.getElementById("fridgeQuantity").value) || 1,
+                    unit: document.getElementById("fridgeUnit").value,
+                    expiryDays: parseInt(document.getElementById("fridgeExpiryDays").value) || 3,
+                    estimatedCost: parseFloat(document.getElementById("fridgeEstimatedCost").value) || 0
+                };
+
+                try {
+                    const res = await fetch("/api/fridgeapi/add", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        toastr.success(result.message);
+                        bootstrap.Modal.getInstance(document.getElementById("addFridgeItemModal")).hide();
+                        document.getElementById("addFridgeItemForm").reset();
+                        loadFridgeItems();
+                    } else {
+                        toastr.error("Có lỗi xảy ra.");
+                    }
+                } catch (err) {
+                    toastr.error("Lỗi kết nối máy chủ.");
+                }
+            });
+        });
+
+        async function loadFridgeItems() {
+            const container = document.getElementById("fridgeItemsContainer");
+            container.innerHTML = `<div class="col-12 text-center py-4"><div class="spinner-border text-info"></div></div>`;
+
+            try {
+                const res = await fetch(`/api/fridgeapi/items?category=${currentCategory}`);
+                const data = await res.json();
+
+                if (!data.success || data.items.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <div class="fs-1 text-muted">🧊</div>
+                            <h5 class="text-muted mt-2">Tủ lạnh đang trống</h5>
+                            <p class="small text-muted">Hãy bấm nút "Thêm thực phẩm vào tủ" để bắt đầu theo dõi hạn sử dụng.</p>
+                        </div>
+                    `;
+                    document.getElementById("statTotalItems").textContent = "0";
+                    document.getElementById("statExpiringSoon").textContent = "0";
+                    return;
+                }
+
+                document.getElementById("statTotalItems").textContent = data.totalItems;
+                document.getElementById("statExpiringSoon").textContent = data.expiringSoonCount;
+
+                container.innerHTML = "";
+                data.items.forEach(item => {
+                    let cardBorder = "";
+                    if (item.status === "EXPIRING_SOON") cardBorder = "border-warning";
+                    if (item.status === "EXPIRED") cardBorder = "border-danger";
+
+                    const cardHtml = `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="kit-card kit-card-hover p-3 h-100 d-flex flex-column justify-content-between ${cardBorder}">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="${item.badgeClass} px-2 py-1">${item.statusText}</span>
+                                        <span class="small text-muted">${item.purchasedDate}</span>
+                                    </div>
+                                    <h6 class="fw-bold mb-1 text-dark">${item.itemName}</h6>
+                                    <div class="small text-muted mb-2">
+                                        <i class="bi bi-box2 me-1"></i>Số lượng: <strong>${item.quantity} ${item.unit}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="border-top pt-2 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="small text-muted">Hạn dùng: <strong>${item.expiryDate}</strong></span>
+                                        ${item.estimatedCost > 0 ? `<span class="small text-muted">${item.estimatedCost.toLocaleString()} đ</span>` : ''}
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-success flex-grow-1" onclick="consumeItem(${item.id})">
+                                            <i class="bi bi-check-lg me-1"></i> Đã dùng xong
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="deleteItem(${item.id})" title="Xóa bỏ">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML("beforeend", cardHtml);
+                });
+
+            } catch (err) {
+                toastr.error("Lỗi tải danh sách tủ lạnh.");
+            }
+        }
+
+        async function consumeItem(id) {
+            try {
+                const res = await fetch(`/api/fridgeapi/consume/${id}`, { method: "PUT" });
+                const result = await res.json();
+                if (result.success) {
+                    toastr.success(result.message);
+                    loadFridgeItems();
+                }
+            } catch (err) {
+                toastr.error("Lỗi xử lý.");
+            }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm("Bạn có chắc muốn xóa nguyên liệu này?")) return;
+            try {
+                const res = await fetch(`/api/fridgeapi/delete/${id}`, { method: "DELETE" });
+                const result = await res.json();
+                if (result.success) {
+                    toastr.info(result.message);
+                    loadFridgeItems();
+                }
+            } catch (err) {
+                toastr.error("Lỗi xử lý.");
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const res = await fetch("/api/fridgeapi/notifications");
+                const data = await res.json();
+                const list = document.getElementById("notificationsList");
+
+                if (!data.success || data.notifications.length === 0) {
+                    list.innerHTML = `<div class="text-center py-4 text-muted small">Chưa có cảnh báo nào. Các thực phẩm đều đang trong hạn an toàn!</div>`;
+                    return;
+                }
+
+                list.innerHTML = "";
+                data.notifications.forEach(n => {
+                    const item = `
+                        <div class="p-3 mb-2 rounded-3 bg-light border border-start-4 border-warning">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-dark small">${n.title}</strong>
+                                <span class="text-muted" style="font-size: 0.75rem;">${n.createdAt}</span>
+                            </div>
+                            <div class="small text-muted">${n.message}</div>
+                        </div>
+                    `;
+                    list.insertAdjacentHTML("beforeend", item);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+}

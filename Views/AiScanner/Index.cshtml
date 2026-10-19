@@ -1,0 +1,487 @@
+@{
+    ViewData["Title"] = "Trợ Lý AI Vision - Quét Ảnh Dinh Dưỡng";
+    bool isPro = ViewBag.IsPro ?? false;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                <div>
+                    <h3 class="fw-bold mb-1">
+                        <i class="bi bi-camera-fill text-warning me-2"></i>Trợ Lý AI Vision Assistant
+                        <span class="badge badge-role-pro ms-2 px-3 py-1" style="font-size: 0.8rem;">GOOGLE GEMINI</span>
+                    </h3>
+                    <p class="text-muted small mb-0">Chụp ảnh thay vì gõ tìm kiếm thủ công — Giảm ma sát ra quyết định khi ăn uống</p>
+                </div>
+            </div>
+
+            @if (!isPro)
+            {
+                <!-- Giao diện Khóa dành cho User Free -->
+                <div class="kit-card p-5 text-center shadow-sm">
+                    <div class="fs-1 text-warning mb-2">👑</div>
+                    <h4 class="fw-bold">Tính Năng Giới Hạn: Gói PRO VIP</h4>
+                    <p class="text-muted col-md-8 mx-auto">
+                        Tính năng nhận diện mâm cơm và nguyên liệu từ ảnh 2D thông qua <strong>Google Gemini AI</strong> chỉ dành cho tài khoản Pro VIP để kiểm soát chi phí hạ tầng API.
+                    </p>
+
+                    <div class="alert alert-warning border-0 small text-start col-md-8 mx-auto my-4">
+                        <div class="fw-bold mb-1"><i class="bi bi-stars me-1"></i> Trợ lý AI Vision có thể làm gì?</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Nhận diện chính xác các món ăn Việt Nam từ ảnh mâm cơm thực tế.</li>
+                            <li>Tự động khớp dữ liệu chuẩn từ Thư viện Food DB để cho ra calo chính xác nhất.</li>
+                            <li>Tự động nhận diện nhiều nguyên liệu thô trong 1 ảnh và gán hạn sử dụng mặc định.</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <a asp-controller="Account" asp-action="UpgradePro" class="btn btn-warning px-4 py-2 fw-bold text-dark shadow-sm">
+                            <i class="bi bi-stars me-1"></i> Nâng cấp lên PRO VIP ngay
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary px-4 py-2">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập bằng prouser
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Giao diện PRO: 2 Tab Quét Món Đã Nấu & Quét Nguyên Liệu -->
+                <ul class="nav nav-pills mb-4 nav-justified kit-card p-2 shadow-sm" id="aiTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold py-2 rounded-3" id="cooked-tab" data-bs-toggle="pill" data-bs-target="#cooked-panel" type="button" role="tab">
+                            🍲 1. Quét Món Ăn Đã Nấu (Ghi Nhật Ký)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold py-2 rounded-3" id="raw-tab" data-bs-toggle="pill" data-bs-target="#raw-panel" type="button" role="tab">
+                            🥦 2. Quét Nguyên Liệu Thô (Vào Tủ Lạnh)
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="aiTabContent">
+                    <!-- TAB 1: QUÉT MÓN ĂN ĐÃ NẤU -->
+                    <div class="tab-pane fade show active" id="cooked-panel" role="tabpanel">
+                        <div class="row g-4">
+                            <!-- Cột Upload Ảnh -->
+                            <div class="col-md-6">
+                                <div class="kit-card p-4 h-100 text-center d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h5 class="fw-bold mb-2">Tải ảnh hoặc chụp ảnh mâm cơm</h5>
+                                        <p class="text-muted small">Chụp ảnh đĩa thức ăn hoặc mâm cơm (ưu tiên món Việt Nam)</p>
+
+                                        <div class="border border-2 border-dashed rounded-4 p-4 my-3 bg-light cursor-pointer position-relative" 
+                                             id="dropZoneCooked" style="min-height: 220px; display: flex; align-items: center; justify-content: center;">
+                                            <input type="file" id="fileCookedInput" accept="image/*" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" />
+                                            <div id="dropPromptCooked">
+                                                <i class="bi bi-cloud-arrow-up text-success fs-1"></i>
+                                                <div class="fw-semibold small mt-2">Bấm để chọn ảnh hoặc kéo thả vào đây</div>
+                                                <div class="text-muted" style="font-size: 0.75rem;">Hỗ trợ định dạng JPG, PNG, WebP</div>
+                                            </div>
+                                            <img id="previewCookedImg" class="img-fluid rounded-3 d-none" style="max-height: 240px; object-fit: cover;" />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <button class="btn btn-kit-primary w-100 py-2 fw-semibold" id="analyzeCookedBtn" disabled>
+                                            <i class="bi bi-magic me-1"></i> Phân tích Dinh Dưỡng bằng Gemini AI
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cột Kết Quả Dự Đoán & Xác Nhận -->
+                            <div class="col-md-6">
+                                <div class="kit-card p-4 h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h5 class="fw-bold mb-3"><i class="bi bi-clipboard2-check text-success me-2"></i>Kết Quả Phân Tích AI</h5>
+
+                                        <!-- Spinner khi đang gọi API -->
+                                        <div id="loadingCooked" class="text-center py-5 d-none">
+                                            <div class="spinner-border text-warning" style="width: 3rem; height: 3rem;"></div>
+                                            <div class="fw-bold mt-3 text-dark">Google Gemini đang nhận diện mâm cơm...</div>
+                                            <div class="small text-muted">Ước tính calo, macro và phân loại Đèn Giao Thông</div>
+                                        </div>
+
+                                        <!-- Placeholder khi chưa quét -->
+                                        <div id="emptyCookedPrompt" class="text-center py-5 text-muted">
+                                            <i class="bi bi-camera text-secondary fs-1"></i>
+                                            <p class="small mt-2">Tải ảnh ở khung bên trái và bấm <strong>Phân tích</strong> để nhận diện món ăn.</p>
+                                        </div>
+
+                                        <!-- Thẻ kết quả AI -->
+                                        <div id="resultCookedSection" class="d-none">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <h5 class="fw-bold text-dark mb-0" id="resDishName">Cơm tấm sườn bì chả</h5>
+                                                    <span class="badge bg-light text-dark border small mt-1" id="resServingSize">1 phần</span>
+                                                </div>
+                                                <span class="badge badge-tl-red px-2 py-1" id="resTrafficLight">🔴 Đỏ</span>
+                                            </div>
+
+                                            <div class="alert alert-info py-2 px-3 small border-0 mb-3" id="resSourceBadge">
+                                                <i class="bi bi-check-circle me-1"></i> Khớp số liệu chuẩn từ Thư viện Food DB
+                                            </div>
+
+                                            <div class="p-3 bg-light rounded-3 mb-3">
+                                                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                                                    <span class="small text-muted">Năng lượng ước tính:</span>
+                                                    <span class="fs-4 fw-extrabold text-success" id="resCalories">720 kcal</span>
+                                                </div>
+                                                <div class="row text-center g-2 small border-top pt-2">
+                                                    <div class="col-4">Đạm: <strong id="resProtein">36g</strong></div>
+                                                    <div class="col-4">Carb: <strong id="resCarbs">85g</strong></div>
+                                                    <div class="col-4">Béo: <strong id="resFat">28g</strong></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="small text-muted mb-3 fst-italic" id="resAdvice">
+                                                * Lời khuyên dinh dưỡng từ AI...
+                                            </div>
+
+                                            <!-- Form chọn bữa ăn để ghi vào Nhật Ký -->
+                                            <div class="border-top pt-3">
+                                                <label class="form-label small fw-semibold">Chọn bữa ăn để ghi nhận:</label>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-7">
+                                                        <select id="targetMealType" class="form-select form-select-sm">
+                                                            <option value="Breakfast">Bữa Sáng</option>
+                                                            <option value="Lunch" selected>Bữa Trưa</option>
+                                                            <option value="Dinner">Bữa Tối</option>
+                                                            <option value="Snack">Ăn Vặt / Phụ</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-5">
+                                                        <input type="number" step="0.5" id="targetQuantity" class="form-control form-control-sm" value="1.0" min="0.5" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="actionCookedSection" class="d-none">
+                                        <button class="btn btn-kit-primary w-100 py-2 fw-semibold" id="confirmSaveToLogBtn">
+                                            <i class="bi bi-check2-circle me-1"></i> Xác nhận & Ghi vào Nhật Ký Hôm Nay
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: QUÉT NGUYÊN LIỆU THÔ VÀO TỦ LẠNH -->
+                    <div class="tab-pane fade" id="raw-panel" role="tabpanel">
+                        <div class="kit-card p-4 shadow-sm text-center">
+                            <h5 class="fw-bold mb-2">Chụp ảnh túi đồ / nguyên liệu vừa mua</h5>
+                            <p class="text-muted small">Gemini sẽ nhận diện các nguyên liệu thô và tự động gợi ý hạn sử dụng</p>
+
+                            <div class="border border-2 border-dashed rounded-4 p-4 my-3 bg-light cursor-pointer position-relative col-md-6 mx-auto" style="min-height: 180px; display: flex; align-items: center; justify-content: center;">
+                                <input type="file" id="fileRawInput" accept="image/*" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" />
+                                <div id="dropPromptRaw">
+                                    <i class="bi bi-basket text-success fs-1"></i>
+                                    <div class="fw-semibold small mt-2">Bấm để chọn ảnh túi thực phẩm</div>
+                                </div>
+                                <img id="previewRawImg" class="img-fluid rounded-3 d-none" style="max-height: 200px;" />
+                            </div>
+
+                            <button class="btn btn-kit-primary px-4 py-2" id="analyzeRawBtn" disabled>
+                                <i class="bi bi-magic me-1"></i> Phân tích Nguyên Liệu
+                            </button>
+
+                            <!-- Kết quả nguyên liệu -->
+                            <div id="rawResultsContainer" class="col-md-8 mx-auto mt-4 text-start d-none">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-snow text-info me-2"></i>Nguyên liệu phát hiện được:</h6>
+                                <div class="list-group mb-3" id="rawItemsList"></div>
+                                <button class="btn btn-outline-success w-100" id="addAllToFridgeBtn">
+                                    <i class="bi bi-plus-lg me-1"></i> Cất toàn bộ vào Tủ Lạnh Ảo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentDishResult = null;
+        let detectedIngredients = [];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Tab Cooked Food
+            const fileCooked = document.getElementById("fileCookedInput");
+            const previewCooked = document.getElementById("previewCookedImg");
+            const dropPromptCooked = document.getElementById("dropPromptCooked");
+            const analyzeBtn = document.getElementById("analyzeCookedBtn");
+
+            if (fileCooked) {
+                fileCooked.addEventListener("change", function () {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            previewCooked.src = e.target.result;
+                            previewCooked.classList.remove("d-none");
+                            dropPromptCooked.classList.add("d-none");
+                            analyzeBtn.disabled = false;
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+
+                analyzeBtn.addEventListener("click", analyzeCookedFood);
+                document.getElementById("confirmSaveToLogBtn").addEventListener("click", saveAiDishToDailyLog);
+            }
+
+            // Tab Raw Ingredients
+            const fileRaw = document.getElementById("fileRawInput");
+            const previewRaw = document.getElementById("previewRawImg");
+            const dropPromptRaw = document.getElementById("dropPromptRaw");
+            const analyzeRawBtn = document.getElementById("analyzeRawBtn");
+
+            if (fileRaw) {
+                fileRaw.addEventListener("change", function () {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            previewRaw.src = e.target.result;
+                            previewRaw.classList.remove("d-none");
+                            dropPromptRaw.classList.add("d-none");
+                            analyzeRawBtn.disabled = false;
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+
+                analyzeRawBtn.addEventListener("click", analyzeRawIngredients);
+                document.getElementById("addAllToFridgeBtn").addEventListener("click", addAllIngredientsToFridge);
+            }
+        });
+
+        // 1. Phân tích món ăn đã nấu qua API
+        async function analyzeCookedFood() {
+            const fileInput = document.getElementById("fileCookedInput");
+            if (!fileInput.files || !fileInput.files[0]) return;
+
+            const formData = new FormData();
+            formData.append("imageFile", fileInput.files[0]);
+
+            const spinner = document.getElementById("loadingCooked");
+            const emptyPrompt = document.getElementById("emptyCookedPrompt");
+            const resultSection = document.getElementById("resultCookedSection");
+            const actionSection = document.getElementById("actionCookedSection");
+
+            spinner.classList.remove("d-none");
+            emptyPrompt.classList.add("d-none");
+            resultSection.classList.add("d-none");
+            actionSection.classList.add("d-none");
+
+            try {
+                const res = await fetch("/api/aivisionapi/scan-dish", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await res.json();
+                spinner.classList.add("d-none");
+
+                if (!data.success) {
+                    toastr.error(data.message || "Không thể phân tích ảnh.");
+                    emptyPrompt.classList.remove("d-none");
+                    return;
+                }
+
+                currentDishResult = data;
+
+                // Render kết quả
+                document.getElementById("resDishName").textContent = data.dishName;
+                document.getElementById("resServingSize").textContent = data.servingSize;
+                document.getElementById("resCalories").textContent = `${data.calories} kcal`;
+                document.getElementById("resProtein").textContent = `${data.protein}g`;
+                document.getElementById("resCarbs").textContent = `${data.carbs}g`;
+                document.getElementById("resFat").textContent = `${data.fat}g`;
+                document.getElementById("resAdvice").textContent = `"${data.advice}"`;
+
+                const tlBadge = document.getElementById("resTrafficLight");
+                if (data.trafficLightStatic === "GREEN") {
+                    tlBadge.className = "badge badge-tl-green px-2 py-1";
+                    tlBadge.textContent = "🟢 Xanh";
+                } else if (data.trafficLightStatic === "YELLOW") {
+                    tlBadge.className = "badge badge-tl-yellow px-2 py-1";
+                    tlBadge.textContent = "🟡 Vàng";
+                } else {
+                    tlBadge.className = "badge badge-tl-red px-2 py-1";
+                    tlBadge.textContent = "🔴 Đỏ";
+                }
+
+                const sourceBadge = document.getElementById("resSourceBadge");
+                if (data.isDbMatched) {
+                    sourceBadge.className = "alert alert-success py-2 px-3 small border-0 mb-3";
+                    sourceBadge.innerHTML = `<i class="bi bi-check-circle me-1"></i> Khớp số liệu chuẩn từ Thư viện Food DB (#${data.foodId})`;
+                } else {
+                    sourceBadge.className = "alert alert-warning py-2 px-3 small border-0 mb-3";
+                    sourceBadge.innerHTML = `<i class="bi bi-info-circle me-1"></i> Dữ liệu AI ước tính (Chưa có trong Thư viện)`;
+                }
+
+                resultSection.classList.remove("d-none");
+                actionSection.classList.remove("d-none");
+                toastr.success("Phân tích ảnh thành công!");
+
+            } catch (err) {
+                spinner.classList.add("d-none");
+                emptyPrompt.classList.remove("d-none");
+                toastr.error("Lỗi khi kết nối đến dịch vụ AI.");
+            }
+        }
+
+        // Lưu món AI vào Nhật Ký
+        async function saveAiDishToDailyLog() {
+            if (!currentDishResult) return;
+
+            let foodId = currentDishResult.foodId;
+
+            // Nếu món chưa có trong DB, tự động tạo mới món với IsCustom = true
+            if (!foodId || foodId === 0) {
+                try {
+                    const createRes = await fetch("/api/foodapi/custom", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            name: currentDishResult.dishName,
+                            servingSize: currentDishResult.servingSize,
+                            calories: currentDishResult.calories,
+                            protein: currentDishResult.protein,
+                            carbs: currentDishResult.carbs,
+                            fat: currentDishResult.fat
+                        })
+                    });
+                    const createData = await createRes.json();
+                    if (createData.success) {
+                        foodId = createData.food.id;
+                    }
+                } catch (e) {
+                    toastr.error("Lỗi tạo món ăn.");
+                    return;
+                }
+            }
+
+            const mealType = document.getElementById("targetMealType").value;
+            const quantity = parseFloat(document.getElementById("targetQuantity").value) || 1.0;
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            try {
+                const addRes = await fetch("/api/dailylogapi/add-item", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        date: todayStr,
+                        mealType: mealType,
+                        foodId: foodId,
+                        quantity: quantity,
+                        isAiEstimated: true
+                    })
+                });
+
+                if (addRes.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã lưu vào Nhật Ký!',
+                        text: `Món '${currentDishResult.dishName}' đã được ghi nhận vào ${mealType} hôm nay.`,
+                        confirmButtonText: 'Xem Nhật Ký ngay',
+                        showCancelButton: true,
+                        cancelButtonText: 'Ở lại trang này'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "/DailyLog/Index";
+                        }
+                    });
+                } else {
+                    toastr.error("Không thể ghi món vào nhật ký.");
+                }
+            } catch (err) {
+                toastr.error("Lỗi kết nối máy chủ.");
+            }
+        }
+
+        // 2. Phân tích nguyên liệu thô
+        async function analyzeRawIngredients() {
+            const fileInput = document.getElementById("fileRawInput");
+            if (!fileInput.files || !fileInput.files[0]) return;
+
+            const formData = new FormData();
+            formData.append("imageFile", fileInput.files[0]);
+
+            toastr.info("Đang phân tích danh sách nguyên liệu...");
+
+            try {
+                const res = await fetch("/api/aivisionapi/scan-ingredients", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    toastr.error("Không nhận diện được nguyên liệu.");
+                    return;
+                }
+
+                detectedIngredients = data.ingredients;
+                const container = document.getElementById("rawResultsContainer");
+                const list = document.getElementById("rawItemsList");
+                list.innerHTML = "";
+
+                detectedIngredients.forEach(item => {
+                    const row = `
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="text-dark">${item.name}</strong>
+                                <div class="small text-muted">${item.quantity} ${item.unit} &bull; Loại: ${item.category}</div>
+                            </div>
+                            <span class="badge bg-warning-subtle text-warning-emphasis">Hạn gợi ý: ~${item.recommendedExpiryDays} ngày</span>
+                        </div>
+                    `;
+                    list.insertAdjacentHTML("beforeend", row);
+                });
+
+                container.classList.remove("d-none");
+                toastr.success(`Đã nhận diện ${detectedIngredients.length} nguyên liệu!`);
+
+            } catch (err) {
+                toastr.error("Lỗi kết nối AI.");
+            }
+        }
+
+        // Cất nguyên liệu vào tủ lạnh
+        async function addAllIngredientsToFridge() {
+            if (!detectedIngredients.length) return;
+
+            for (const item of detectedIngredients) {
+                await fetch("/api/fridgeapi/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        itemName: item.name,
+                        category: item.category,
+                        quantity: item.quantity,
+                        unit: item.unit,
+                        expiryDays: item.recommendedExpiryDays,
+                        estimatedCost: 30000
+                    })
+                });
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã cất vào Tủ Lạnh Ảo!',
+                text: 'Toàn bộ nguyên liệu đã được lưu trữ và theo dõi hạn sử dụng.',
+                confirmButtonText: 'Đến Tủ Lạnh xem ngay'
+            }).then(() => {
+                window.location.href = "/Fridge/Index";
+            });
+        }
+    </script>
+}

@@ -1,0 +1,227 @@
+@model BTL_WEB.Models.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ thể chất & Mục tiêu Calo";
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Cột trái: Form cập nhật thông số thể chất -->
+        <div class="col-lg-8">
+            <div class="kit-card p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                    <div>
+                        <h4 class="fw-bold mb-1"><i class="bi bi-person-gear text-success me-2"></i>Hồ sơ thể chất & Mục tiêu dinh dưỡng</h4>
+                        <p class="text-muted small mb-0">Các chỉ số được dùng để tính toán BMR, TDEE và Calo mục tiêu mỗi ngày</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        @if (Model.Role == "Pro")
+                        {
+                            <span class="badge badge-role-pro px-3 py-2">👑 PRO VIP</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-role-free px-3 py-2">🌱 FREE</span>
+                            <a asp-action="UpgradePro" class="btn btn-sm btn-outline-warning ms-2 fw-bold">
+                                <i class="bi bi-stars"></i> Nâng cấp PRO
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <form asp-action="Profile" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="hidden" asp-for="Email" />
+                    <input type="hidden" asp-for="Role" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label fw-semibold small text-secondary"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-secondary">Email tài khoản</label>
+                            <input value="@Model.Email" class="form-control bg-light" readonly />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label asp-for="Gender" class="form-label fw-semibold small text-secondary"></label>
+                            <select asp-for="Gender" class="form-select">
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Age" class="form-label fw-semibold small text-secondary"></label>
+                            <input asp-for="Age" type="number" class="form-control" />
+                            <span asp-validation-for="Age" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="HeightCm" class="form-label fw-semibold small text-secondary"></label>
+                            <div class="input-group">
+                                <input asp-for="HeightCm" type="number" step="0.5" class="form-control" />
+                                <span class="input-group-text bg-light text-muted small">cm</span>
+                            </div>
+                            <span asp-validation-for="HeightCm" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="WeightKg" class="form-label fw-semibold small text-secondary"></label>
+                            <div class="input-group">
+                                <input asp-for="WeightKg" type="number" step="0.5" class="form-control" />
+                                <span class="input-group-text bg-light text-muted small">kg</span>
+                            </div>
+                            <span asp-validation-for="WeightKg" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ActivityLevel" class="form-label fw-semibold small text-secondary"></label>
+                            <select asp-for="ActivityLevel" class="form-select">
+                                <option value="1.2">Ít vận động (Dân văn phòng, không tập)</option>
+                                <option value="1.375">Vận động nhẹ (Tập 1-3 ngày/tuần)</option>
+                                <option value="1.55">Vận động vừa (Tập 3-5 ngày/tuần)</option>
+                                <option value="1.725">Vận động nhiều (Tập 6-7 ngày/tuần)</option>
+                                <option value="1.9">Vận động cực nhiều (Vận động viên)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="GoalType" class="form-label fw-semibold small text-secondary"></label>
+                            <select asp-for="GoalType" class="form-select">
+                                <option value="LoseWeight">Giảm mỡ / Giảm cân (-500 kcal/ngày)</option>
+                                <option value="Maintain">Giữ cân / Duy trì thể trạng</option>
+                                <option value="GainWeight">Tăng cân / Tăng cơ (+300 kcal/ngày)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MealsPerDay" class="form-label fw-semibold small text-secondary"></label>
+                        <select asp-for="MealsPerDay" class="form-select" style="max-width: 300px;">
+                            <option value="1">1 bữa/ngày (Chế độ OMAD)</option>
+                            <option value="2">2 bữa/ngày (Intermittent Fasting 16/8)</option>
+                            <option value="3">3 bữa/ngày (Sáng, Trưa, Tối - Tiêu chuẩn)</option>
+                            <option value="4">4 bữa/ngày (Sáng, Trưa, Tối, Xế chiều)</option>
+                            <option value="5">5 bữa/ngày (Chia nhỏ nhiều bữa)</option>
+                            <option value="6">6 bữa/ngày</option>
+                        </select>
+                        <div class="form-text small text-muted">
+                            <i class="bi bi-info-circle me-1"></i> Số bữa ăn/ngày dùng để tính ngưỡng <strong>Đèn Giao Thông Động</strong> cho từng bữa ăn.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-kit-primary px-4 py-2">
+                            <i class="bi bi-save me-1"></i> Lưu thông số & Cập nhật Calo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cột phải: Thẻ hiển thị BMR, TDEE & Target Calories dẫn xuất -->
+        <div class="col-lg-4">
+            <div class="d-flex flex-column gap-3">
+                <!-- Card Target Calories -->
+                <div class="kit-card p-4 text-center border-success" style="border-width: 2px;">
+                    <div class="small fw-bold text-success text-uppercase letter-spacing-1 mb-1">Mục tiêu dinh dưỡng tự động</div>
+                    <div class="display-4 fw-extrabold text-success my-2">@Model.TargetCalories</div>
+                    <div class="fw-bold text-muted">kcal / ngày</div>
+                    <div class="small text-muted mt-2 border-top pt-2">
+                        * Giá trị dẫn xuất tự động tính theo công thức TDEE/BMR, không nhập tay
+                    </div>
+                </div>
+
+                <!-- Card BMR & TDEE breakdown -->
+                <div class="kit-card p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-calculator me-2 text-primary"></i>Phân tích chỉ số</h6>
+                    
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="text-muted small">BMR (Nghỉ ngơi):</span>
+                        <span class="fw-bold">@Model.Bmr kcal</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="text-muted small">TDEE (Tổng tiêu hao):</span>
+                        <span class="fw-bold">@Model.Tdee kcal</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="text-muted small">Mục tiêu hiện tại:</span>
+                        <span class="badge bg-light text-dark fw-bold">
+                            @(Model.GoalType == "LoseWeight" ? "Giảm mỡ (-500 kcal)" : (Model.GoalType == "GainWeight" ? "Tăng cân (+300 kcal)" : "Duy trì"))
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <span class="text-muted small">Quy chuẩn bữa:</span>
+                        <span class="fw-bold">@Model.MealsPerDay bữa / ngày</span>
+                    </div>
+                </div>
+
+                <!-- Card BMI & Thể trạng -->
+                <div class="kit-card p-4 border-start border-4 border-@Model.BmiColorClass">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-bold text-muted text-uppercase">Chỉ số thể hình BMI</span>
+                        <span class="badge bg-@Model.BmiColorClass px-2 py-1">@Model.BmiCategory</span>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 mb-2">
+                        <span class="display-6 fw-bold text-dark">@Model.Bmi</span>
+                        <span class="text-muted small">kg/m²</span>
+                    </div>
+
+                    <!-- Thước đo BMI -->
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 25%;" title="Thiếu cân (<18.5)"></div>
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 35%;" title="Cân đối (18.5 - 24.9)"></div>
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 20%;" title="Thừa cân (25 - 29.9)"></div>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%;" title="Béo phì (≥30)"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 0.7rem;">
+                        <span>&lt;18.5</span>
+                        <span>18.5 - 24.9</span>
+                        <span>25 - 29.9</span>
+                        <span>≥30</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+                        <span class="small text-muted">Ước tính % Mỡ cơ thể:</span>
+                        <strong class="text-primary fs-6">~@Model.EstimatedBodyFat%</strong>
+                    </div>
+                </div>
+
+                @if (Model.Role == "Free")
+                {
+                    <!-- Card Khuyến khích Nâng cấp VIP -->
+                    <div class="kit-card p-3 text-center bg-warning bg-opacity-10 border border-warning">
+                        <div class="fs-3">👑</div>
+                        <h6 class="fw-bold mt-1 text-dark">Mở Khóa Trợ Lý AI Gemini</h6>
+                        <p class="small text-muted mb-3">Chụp ảnh mâm cơm để tự động trích xuất calo thay vì gõ tìm thủ công.</p>
+                        <a asp-action="UpgradePro" class="btn btn-warning w-100 fw-bold shadow-sm">
+                            <i class="bi bi-stars me-1"></i> Nâng cấp PRO VIP ngay
+                        </a>
+                    </div>
+                }
+
+                <!-- Tips card -->
+                <div class="kit-card p-3 bg-light border-0">
+                    <div class="d-flex gap-2">
+                        <i class="bi bi-lightbulb text-warning fs-5"></i>
+                        <div class="small text-muted">
+                            Hệ thống sẽ tự động cập nhật lại lịch sử cân nặng mỗi khi bạn thay đổi cân nặng trong hồ sơ để vẽ biểu đồ tiến độ.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

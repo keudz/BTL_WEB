@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Không có quyền truy cập";
+}
+
+<div class="container py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="kit-card p-5 shadow-sm">
+                <div class="fs-1 text-warning mb-3">👑</div>
+                <h3 class="fw-bold">Tính năng dành riêng cho gói PRO VIP</h3>
+                <p class="text-muted">
+                    Tính năng <strong>Quét ảnh AI Vision (Nhận diện món ăn & nguyên liệu bằng Google Gemini)</strong> hiện chỉ khả dụng cho tài khoản Pro để tối ưu chi phí hạ tầng.
+                </p>
+
+                <div class="alert alert-warning border-0 small text-start my-4">
+                    <i class="bi bi-stars text-warning me-1"></i> <strong>Quyền lợi tài khoản Pro:</strong>
+                    <ul class="mb-0 mt-2 ps-3">
+                        <li>Chụp ảnh mâm cơm, AI tự động nhận diện món và ước tính calo/macro.</li>
+                        <li>Chụp ảnh túi đồ mua về, AI tự động nhận diện nguyên liệu vào tủ lạnh.</li>
+                        <li>Gợi ý công thức chế biến thông minh chống lãng phí thực phẩm.</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-house me-1"></i> Về trang chủ
+                    </a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-kit-primary px-4">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập tài khoản Pro
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

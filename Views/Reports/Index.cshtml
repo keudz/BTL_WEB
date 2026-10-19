@@ -1,0 +1,147 @@
+@{
+    ViewData["Title"] = "Báo Cáo & Biểu Đồ Dinh Dưỡng";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow text-success me-2"></i>Báo Cáo & Xu Hướng Dinh Dưỡng</h3>
+            <p class="text-muted small mb-0">Theo dõi năng lượng nạp vào so với mục tiêu và tiến trình thay đổi cân nặng</p>
+        </div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-success active days-btn" data-days="7">7 ngày qua</button>
+            <button type="button" class="btn btn-outline-success days-btn" data-days="30">30 ngày qua</button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Biểu đồ 1: Calo nạp vào vs Calo mục tiêu -->
+        <div class="col-lg-7">
+            <div class="kit-card p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">📊 Năng Lượng Nạp Vào vs Mục Tiêu (kcal)</h5>
+                </div>
+                <div style="height: 320px;">
+                    <canvas id="caloriesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ 2: Biến thiên cân nặng -->
+        <div class="col-lg-5">
+            <div class="kit-card p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">⚖️ Tiến Trình Cân Nặng (kg)</h5>
+                </div>
+                <div style="height: 320px;">
+                    <canvas id="weightChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentDays = 7;
+        let calChartInstance = null;
+        let weightChartInstance = null;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadChartData();
+
+            document.querySelectorAll(".days-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    document.querySelectorAll(".days-btn").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                    currentDays = parseInt(this.getAttribute("data-days"));
+                    loadChartData();
+                });
+            });
+        });
+
+        async function loadChartData() {
+            try {
+                const res = await fetch(`/Reports/GetChartData?days=${currentDays}`);
+                const data = await res.json();
+                if (!data.success) return;
+
+                renderCaloriesChart(data.labels, data.consumedData, data.targetData);
+                renderWeightChart(data.labels, data.weightData);
+            } catch (err) {
+                toastr.error("Lỗi khi tải dữ liệu biểu đồ.");
+            }
+        }
+
+        function renderCaloriesChart(labels, consumed, targets) {
+            const ctx = document.getElementById("caloriesChart").getContext("2d");
+            if (calChartInstance) calChartInstance.destroy();
+
+            calChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Calo Đã Nạp',
+                            data: consumed,
+                            backgroundColor: 'rgba(16, 185, 129, 0.75)',
+                            borderColor: '#10b981',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Mục Tiêu Calo',
+                            data: targets,
+                            type: 'line',
+                            borderColor: '#f59e0b',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function renderWeightChart(labels, weights) {
+            const ctx = document.getElementById("weightChart").getContext("2d");
+            if (weightChartInstance) weightChartInstance.destroy();
+
+            calChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cân nặng (kg)',
+                        data: weights,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#6366f1',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    </script>
+}

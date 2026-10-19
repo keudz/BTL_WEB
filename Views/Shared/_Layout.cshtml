@@ -1,0 +1,221 @@
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - KIT Trợ Lý Calo Thông Minh</title>
+    
+    <!-- Bootstrap 5 CSS & Custom KIT Nutrition Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/kit-theme.css" asp-append-version="true" />
+    
+    <!-- Toastr & SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg kit-navbar py-2 shadow-sm">
+            <div class="container">
+                <!-- Brand Logo -->
+                <a class="navbar-brand kit-brand" asp-controller="Home" asp-action="Index">
+                    <span class="fs-3">🥗</span>
+                    <span>KIT<span class="text-dark fs-6 fw-normal ms-1">Calorie</span></span>
+                </a>
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#kitNavbarContent"
+                        aria-controls="kitNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="kitNavbarContent">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <!-- Left Navigation (Chỉ hiển thị khi đã đăng nhập) -->
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link kit-nav-link" asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-house-door me-1"></i> Trang chủ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link kit-nav-link" asp-controller="DailyLog" asp-action="Index">
+                                    <i class="bi bi-journal-check me-1"></i> Nhật ký bữa ăn
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link kit-nav-link" asp-controller="Fridge" asp-action="Index">
+                                    <i class="bi bi-snow me-1"></i> Tủ lạnh ảo
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link kit-nav-link" asp-controller="Food" asp-action="Index">
+                                    <i class="bi bi-search me-1"></i> Tra cứu món
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link kit-nav-link d-flex align-items-center" asp-controller="AiScanner" asp-action="Index">
+                                    <i class="bi bi-camera-fill me-1 text-warning"></i> Quét ảnh AI
+                                    <span class="badge badge-role-pro ms-1 px-2 py-0" style="font-size: 0.65rem;">PRO</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link kit-nav-link" asp-controller="Reports" asp-action="Index">
+                                    <i class="bi bi-graph-up-arrow me-1"></i> Báo cáo
+                                </a>
+                            </li>
+                        </ul>
+                    }
+
+                    <!-- Right User Menu & Language Selector (i18n) -->
+                    <ul class="navbar-nav ms-auto align-items-center gap-2">
+                        <!-- Language Switcher -->
+                        <li class="nav-item dropdown">
+                            <button class="btn btn-sm btn-light border rounded-pill dropdown-toggle px-2 py-1 small fw-semibold" type="button" data-bs-toggle="dropdown">
+                                🌐 Ngôn ngữ
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="min-width: 130px;">
+                                <li>
+                                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="d-inline">
+                                        <input type="hidden" name="culture" value="vi-VN" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <button type="submit" class="dropdown-item small py-2">🇻🇳 Tiếng Việt</button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="d-inline">
+                                        <input type="hidden" name="culture" value="en-US" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <button type="submit" class="dropdown-item small py-2">🇺🇸 English</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            var role = User.FindFirstValue(ClaimTypes.Role) ?? "Free";
+                            var fullName = User.FindFirst("FullName")?.Value ?? User.Identity.Name;
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown">
+                                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 38px; height: 38px;">
+                                        @(string.IsNullOrEmpty(fullName) ? "U" : fullName.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <div class="text-start d-none d-sm-block">
+                                        <div class="fw-bold small text-dark">@fullName</div>
+                                        <div style="font-size: 0.75rem;">
+                                            @if (role == "Pro")
+                                            {
+                                                <span class="badge badge-role-pro">👑 Pro VIP</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-role-free">🌱 Gói Free</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3" aria-labelledby="userMenuDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                            <i class="bi bi-person-gear me-2"></i>Hồ sơ thể chất & TDEE
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="DailyLog" asp-action="Index">
+                                            <i class="bi bi-calendar-check me-2"></i>Nhật ký hôm nay
+                                        </a>
+                                    </li>
+                                    @if (role == "Free")
+                                    {
+                                        <li>
+                                            <a class="dropdown-item text-warning fw-bold" asp-controller="Account" asp-action="UpgradePro">
+                                                <i class="bi bi-stars me-2"></i>Nâng cấp PRO VIP
+                                            </a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-sm btn-outline-secondary px-3 rounded-pill fw-semibold" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-sm btn-kit-primary px-3 rounded-pill fw-semibold shadow-sm" asp-controller="Account" asp-action="Register">
+                                    <i class="bi bi-person-plus me-1"></i> Đăng ký
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="pb-5 pt-3">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer bg-white border-top py-4 mt-auto">
+        <div class="container text-center text-muted small">
+            <div class="mb-2">
+                <span class="fw-bold text-success">KIT - Smart Calorie Assistant</span> &bull; Đồ án môn học Lập trình Web &bull; ASP.NET Core MVC
+            </div>
+            <div>
+                &copy; @DateTime.UtcNow.Year KIT Team. Ghi nhận nhật ký dinh dưỡng &bull; Chống lãng phí thực phẩm &bull; Hỗ trợ AI Vision
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts: jQuery & Bootstrap 5 Bundle CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Toastr flash message listener -->
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "4000"
+        };
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>toastr.success("@TempData["SuccessMessage"]");</text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>toastr.error("@TempData["ErrorMessage"]");</text>
+        }
+        @if (TempData["InfoMessage"] != null)
+        {
+            <text>toastr.info("@TempData["InfoMessage"]");</text>
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

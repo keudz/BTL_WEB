@@ -1,0 +1,109 @@
+@{
+    ViewData["Title"] = "Trang Chủ - Trợ Lý Calo Thông Minh";
+}
+
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="kit-card p-4 p-md-5 mb-5 shadow-sm border-0 position-relative overflow-hidden" 
+         style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #ffffff 100%); border-left: 6px solid #10b981 !important;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge badge-tl-green px-3 py-2 mb-3">
+                    🥗 GIẢI PHÁP DINH DƯỠNG THỜI ĐẠI MỚI
+                </span>
+                <h1 class="fw-extrabold display-5 text-dark mb-3">
+                    Không chỉ đếm Calo.<br>
+                    Đây là <span class="text-success">Trợ Lý Ăn Uống Thông Minh</span> của bạn.
+                </h1>
+                <p class="text-muted fs-6 mb-4 col-md-10">
+                    Giải quyết triệt để <strong>Decision Fatigue</strong> (căng thẳng khi cân đo từng gam), <strong>chống lãng phí thực phẩm</strong> trong tủ lạnh và hỗ trợ <strong>nhận diện món ăn Việt bằng AI Gemini</strong>.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="DailyLog" asp-action="Index" class="btn btn-kit-primary px-4 py-2 fw-semibold">
+                        <i class="bi bi-journal-plus me-1"></i> Nhật ký hôm nay
+                    </a>
+                    <a asp-controller="Fridge" asp-action="Index" class="btn btn-outline-success px-4 py-2 fw-semibold bg-white">
+                        <i class="bi bi-snow me-1"></i> Mở Tủ lạnh ảo
+                    </a>
+                    <a asp-controller="AiScanner" asp-action="Index" class="btn btn-warning px-4 py-2 fw-semibold shadow-sm">
+                        <i class="bi bi-camera-fill me-1"></i> Quét ảnh AI <span class="badge bg-dark ms-1">PRO</span>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <div class="display-1">🍲</div>
+                <div class="badge badge-tl-green fs-6 px-3 py-2 mt-2 shadow-sm">🟢 Xanh &bull; 🟡 Vàng &bull; 🔴 Đỏ</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Trụ Cột Đột Phá -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-success">
+                <div class="fs-1 text-success mb-2">🚦</div>
+                <h5 class="fw-bold">Hệ Thống Đèn Giao Thông</h5>
+                <p class="text-muted small mb-3">
+                    Giảm gánh nặng tâm lý khi ăn kiêng. Phân loại màu sắc trực quan (Xanh: ăn thoải mái, Vàng: vừa phải, Đỏ: kiểm soát) gắn với từng món và % calo bữa ăn.
+                </p>
+                <a asp-controller="DailyLog" asp-action="Index" class="text-success fw-bold small text-decoration-none">
+                    Xem cách tính Đèn giao thông <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-warning">
+                <div class="fs-1 text-warning mb-2">❄️</div>
+                <h5 class="fw-bold">Tủ Lạnh Ảo & Chống Lãng Phí</h5>
+                <p class="text-muted small mb-3">
+                    Tác vụ ngầm (Cron Job) tự động quét nguyên liệu có hạn dùng ≤ 48 giờ mỗi ngày, gửi cảnh báo kèm gợi ý công thức chế biến nhanh để tiết kiệm kinh tế.
+                </p>
+                <a asp-controller="Fridge" asp-action="Index" class="text-warning-emphasis fw-bold small text-decoration-none">
+                    Kiểm tra hạn đồ ăn <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-primary">
+                <div class="fs-1 text-primary mb-2">🤖</div>
+                <h5 class="fw-bold">Trợ Lý AI Vision Assistant</h5>
+                <p class="text-muted small mb-3">
+                    Tích hợp Google Gemini: Chụp ảnh mâm cơm để tự động ước tính calo và khớp với Thư viện món ăn Việt Nam chuẩn xác mà không cần gõ tìm kiếm thủ công.
+                </p>
+                <a asp-controller="AiScanner" asp-action="Index" class="text-primary fw-bold small text-decoration-none">
+                    Trải nghiệm Quét ảnh AI <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Điều Khiển Nhanh -->
+    <div class="kit-card p-4 shadow-sm">
+        <h5 class="fw-bold mb-3"><i class="bi bi-compass text-success me-2"></i>Lối Tắt Nhanh Cho Buổi Báo Cáo / Demo:</h5>
+        <div class="row g-2">
+            <div class="col-sm-6 col-lg-3">
+                <a asp-controller="DailyLog" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
+                    <i class="bi bi-journal-check me-2 text-success"></i>1. Nhật ký Calo 4 bữa
+                </a>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Fridge" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
+                    <i class="bi bi-snow me-2 text-info"></i>2. Tủ lạnh ảo (Cảnh báo 48h)
+                </a>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <a asp-controller="AiScanner" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
+                    <i class="bi bi-camera me-2 text-warning"></i>3. Quét ảnh Gemini AI (Pro)
+                </a>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Food" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
+                    <i class="bi bi-search me-2 text-primary"></i>4. Tra cứu 35+ món Việt
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

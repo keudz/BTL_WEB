@@ -1,0 +1,263 @@
+@{
+    ViewData["Title"] = "Tra cứu món ăn & Dinh dưỡng";
+}
+
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-7">
+            <h3 class="fw-bold mb-1">🔍 Tra cứu Thư viện Thực phẩm Việt</h3>
+            <p class="text-muted small mb-0">Hơn 35+ món ăn chuẩn hóa kèm phân loại Đèn Giao Thông Xanh / Vàng / Đỏ trực quan</p>
+        </div>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <button type="button" class="btn btn-kit-primary" data-bs-toggle="modal" data-bs-target="#customFoodModal">
+                    <i class="bi bi-plus-circle me-1"></i> Tự tạo món mới
+                </button>
+                @if (User.IsInRole("Pro"))
+                {
+                    <a asp-action="Manage" class="btn btn-outline-warning ms-2">
+                        <i class="bi bi-sliders me-1"></i> Quản lý thư viện
+                    </a>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Thanh tìm kiếm & Bộ lọc Đèn Giao Thông -->
+    <div class="kit-card p-3 p-md-4 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="foodSearchInput" class="form-control border-start-0" 
+                           placeholder="Nhập tên món (phở, cơm tấm, bún chả, bánh mì...)" />
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="small fw-bold text-muted me-1">Lọc calo:</span>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill active filter-btn" data-tl="ALL">Tất cả</button>
+                    <button class="btn btn-sm badge-tl-green rounded-pill filter-btn" data-tl="GREEN">🟢 Xanh (≤200 calo)</button>
+                    <button class="btn btn-sm badge-tl-yellow rounded-pill filter-btn" data-tl="YELLOW">🟡 Vàng (200-500 calo)</button>
+                    <button class="btn btn-sm badge-tl-red rounded-pill filter-btn" data-tl="RED">🔴 Đỏ (>500 calo)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kết quả tìm kiếm hiển thị động qua AJAX -->
+    <div id="loadingSpinner" class="text-center py-5 d-none">
+        <div class="spinner-border text-success" role="status"></div>
+        <div class="text-muted small mt-2">Đang tải dữ liệu...</div>
+    </div>
+
+    <div class="row g-3" id="foodListContainer">
+        <!-- Render bằng AJAX JS -->
+    </div>
+
+    <!-- Phân trang AJAX -->
+    <nav class="mt-4 d-flex justify-content-center">
+        <ul class="pagination pagination-sm" id="foodPagination"></ul>
+    </nav>
+</div>
+
+<!-- Modal Tự tạo món mới (isCustom = true) -->
+<div class="modal fade" id="customFoodModal" tabindex="-1" aria-labelledby="customFoodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="customFoodModalLabel">✨ Tự tạo món ăn tùy chỉnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Món bạn tạo sẽ có nhãn <em>Tùy chỉnh</em> và được tự động tính Đèn Giao Thông.</p>
+                <form id="createCustomFoodForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Tên món ăn <span class="text-danger">*</span></label>
+                        <input type="text" id="customName" class="form-control" required placeholder="VD: Yến mạch sữa chua việt quất" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Khẩu phần</label>
+                        <input type="text" id="customServing" class="form-control" placeholder="VD: 1 bát con (150g)" value="1 phần" />
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Calo (kcal) <span class="text-danger">*</span></label>
+                            <input type="number" id="customCalories" class="form-control" required min="1" max="5000" placeholder="250" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Chất đạm Protein (g)</label>
+                            <input type="number" step="0.1" id="customProtein" class="form-control" placeholder="15" />
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Tinh bột Carbs (g)</label>
+                            <input type="number" step="0.1" id="customCarbs" class="form-control" placeholder="30" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Chất béo Fat (g)</label>
+                            <input type="number" step="0.1" id="customFat" class="form-control" placeholder="5" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-kit-primary w-100 py-2">
+                        <i class="bi bi-check2-circle me-1"></i> Lưu món ăn
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentQuery = "";
+        let currentTrafficLight = "ALL";
+        let currentPage = 1;
+        let searchTimeout = null;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadFoods();
+
+            // Lắng nghe gõ phím tìm kiếm (Debounce 300ms)
+            document.getElementById("foodSearchInput").addEventListener("input", function (e) {
+                clearTimeout(searchTimeout);
+                currentQuery = e.target.value.trim();
+                currentPage = 1;
+                searchTimeout = setTimeout(loadFoods, 300);
+            });
+
+            // Lắng nghe bộ lọc Đèn Giao Thông
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                    currentTrafficLight = this.getAttribute("data-tl");
+                    currentPage = 1;
+                    loadFoods();
+                });
+            });
+
+            // Submit tạo món custom
+            document.getElementById("createCustomFoodForm").addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const data = {
+                    name: document.getElementById("customName").value,
+                    servingSize: document.getElementById("customServing").value,
+                    calories: parseInt(document.getElementById("customCalories").value) || 0,
+                    protein: parseFloat(document.getElementById("customProtein").value) || 0,
+                    carbs: parseFloat(document.getElementById("customCarbs").value) || 0,
+                    fat: parseFloat(document.getElementById("customFat").value) || 0
+                };
+
+                try {
+                    const res = await fetch("/api/foodapi/custom", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        toastr.success(result.message);
+                        bootstrap.Modal.getInstance(document.getElementById("customFoodModal")).hide();
+                        document.getElementById("createCustomFoodForm").reset();
+                        loadFoods();
+                    } else {
+                        toastr.error("Có lỗi xảy ra khi tạo món.");
+                    }
+                } catch (err) {
+                    toastr.error("Không thể kết nối đến máy chủ.");
+                }
+            });
+        });
+
+        // Hàm gọi RESTful API /api/foodapi/search bằng AJAX
+        async function loadFoods() {
+            const container = document.getElementById("foodListContainer");
+            const spinner = document.getElementById("loadingSpinner");
+            spinner.classList.remove("d-none");
+            container.innerHTML = "";
+
+            const url = `/api/foodapi/search?query=${encodeURIComponent(currentQuery)}&trafficLight=${currentTrafficLight}&page=${currentPage}&pageSize=12`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                spinner.classList.add("d-none");
+
+                if (!data.success || data.items.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <div class="fs-1 text-muted">🍲</div>
+                            <h5 class="text-muted mt-2">Không tìm thấy món ăn phù hợp</h5>
+                            <p class="small text-muted">Hãy thử từ khóa khác hoặc bấm nút "Tự tạo món mới" ở trên.</p>
+                        </div>
+                    `;
+                    renderPagination(0, 1);
+                    return;
+                }
+
+                data.items.forEach(food => {
+                    let badgeClass = "badge-tl-green";
+                    let badgeText = "🟢 Xanh";
+                    if (food.trafficLightStatic === "YELLOW") {
+                        badgeClass = "badge-tl-yellow";
+                        badgeText = "🟡 Vàng";
+                    } else if (food.trafficLightStatic === "RED") {
+                        badgeClass = "badge-tl-red";
+                        badgeText = "🔴 Đỏ";
+                    }
+
+                    const cardHtml = `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="kit-card kit-card-hover p-3 h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge ${badgeClass} px-2 py-1">${badgeText}</span>
+                                        ${food.isCustom ? '<span class="badge bg-secondary-subtle text-secondary small">Tự tạo</span>' : ''}
+                                    </div>
+                                    <h6 class="fw-bold mb-1 text-dark">${food.name}</h6>
+                                    <div class="small text-muted mb-2"><i class="bi bi-box me-1"></i>${food.servingSize}</div>
+                                </div>
+                                <div class="border-top pt-2 mt-2">
+                                    <div class="d-flex justify-content-between align-items-baseline mb-2">
+                                        <span class="fw-extrabold fs-5 text-success">${food.calories} <small class="fs-6 fw-normal text-muted">kcal</small></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between small text-muted bg-light p-2 rounded-2" style="font-size: 0.78rem;">
+                                        <span>Đạm: <strong>${food.protein}g</strong></span>
+                                        <span>Carb: <strong>${food.carbs}g</strong></span>
+                                        <span>Béo: <strong>${food.fat}g</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML("beforeend", cardHtml);
+                });
+
+                renderPagination(data.totalPages, data.currentPage);
+            } catch (err) {
+                spinner.classList.add("d-none");
+                toastr.error("Lỗi khi tải danh sách món ăn.");
+            }
+        }
+
+        function renderPagination(totalPages, page) {
+            const nav = document.getElementById("foodPagination");
+            nav.innerHTML = "";
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement("li");
+                li.className = `page-item ${i === page ? 'active' : ''}`;
+                li.innerHTML = `<button class="page-link shadow-none">${i}</button>`;
+                li.onclick = () => {
+                    currentPage = i;
+                    loadFoods();
+                };
+                nav.appendChild(li);
+            }
+        }
+    </script>
+}

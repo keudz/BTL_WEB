@@ -1,0 +1,223 @@
+@model BTL_WEB.Models.ViewModels.RegisterViewModel
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+    var firebaseApiKey = Configuration["Firebase:ApiKey"] ?? "";
+    var firebaseAuthDomain = Configuration["Firebase:AuthDomain"] ?? "btl-c6d90.firebaseapp.com";
+    var firebaseProjectId = Configuration["Firebase:ProjectId"] ?? "btl-c6d90";
+    var firebaseStorageBucket = Configuration["Firebase:StorageBucket"] ?? "btl-c6d90.firebasestorage.app";
+    var firebaseMessagingSenderId = Configuration["Firebase:MessagingSenderId"] ?? "173035186702";
+    var firebaseAppId = Configuration["Firebase:AppId"] ?? "1:173035186702:web:b9facf55589ed46546aa5f";
+    var firebaseMeasurementId = Configuration["Firebase:MeasurementId"] ?? "G-Y40NS9SZFC";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="kit-card p-4 p-sm-5 shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="fs-1">🥗</div>
+                    <h3 class="fw-bold mt-2">Đăng ký tài khoản KIT</h3>
+                    <p class="text-muted small">Bắt đầu hành trình kiểm soát cân nặng và quản lý tủ lạnh thông minh</p>
+                </div>
+
+                <!-- Nút Đăng ký nhanh bằng Google qua Firebase -->
+                <button type="button" class="btn btn-outline-dark w-100 py-2 d-flex align-items-center justify-content-center gap-2 mb-3 shadow-sm rounded-3" onclick="handleFirebaseGoogleLogin()">
+                    <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.55 10.78l7.98-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        <path fill="none" d="M0 0h48v48H0z"/>
+                    </svg>
+                    <span class="fw-semibold">Đăng ký nhanh với Google (Firebase)</span>
+                </button>
+
+                <div class="my-3 text-center position-relative">
+                    <hr class="text-muted" />
+                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">hoặc đăng ký bằng biểu mẫu</span>
+                </div>
+
+                <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label asp-for="Username" class="form-label fw-semibold small text-secondary"></label>
+                            <input asp-for="Username" class="form-control" placeholder="nguyenvana" />
+                            <span asp-validation-for="Username" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="FullName" class="form-label fw-semibold small text-secondary"></label>
+                            <input asp-for="FullName" class="form-control" placeholder="Nguyễn Văn A" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold small text-secondary"></label>
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label asp-for="Password" class="form-label fw-semibold small text-secondary"></label>
+                            <input asp-for="Password" class="form-control" placeholder="Ít nhất 6 ký tự" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="ConfirmPassword" class="form-label fw-semibold small text-secondary"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 p-3 rounded-3 bg-light border">
+                        <div class="form-check">
+                            <input asp-for="IsProRequested" class="form-check-input" />
+                            <label asp-for="IsProRequested" class="form-check-label fw-bold text-dark">
+                                👑 Kích hoạt ngay gói PRO VIP (Miễn phí trải nghiệm AI Vision)
+                            </label>
+                        </div>
+                        <div class="small text-muted ms-4 mt-1">
+                            Mở khóa nhận diện ảnh mâm cơm & nguyên liệu bằng AI Gemini.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-kit-primary w-100 py-2 mb-3">
+                        <i class="bi bi-person-check me-1"></i> Tạo tài khoản
+                    </button>
+
+                    <div class="text-center small text-muted">
+                        Đã có tài khoản? <a asp-action="Login" class="text-success fw-bold text-decoration-none">Đăng nhập ngay</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <!-- Firebase App & Auth SDK (v10 compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "@firebaseApiKey",
+            authDomain: "@firebaseAuthDomain",
+            projectId: "@firebaseProjectId",
+            storageBucket: "@firebaseStorageBucket",
+            messagingSenderId: "@firebaseMessagingSenderId",
+            appId: "@firebaseAppId",
+            measurementId: "@firebaseMeasurementId"
+        };
+
+        let isFirebaseConfigured = false;
+        try {
+            if (firebaseConfig.apiKey && firebaseConfig.apiKey.trim().length > 10) {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                isFirebaseConfigured = true;
+            }
+        } catch (e) {
+            console.warn("Firebase Init Error:", e);
+        }
+
+        async function handleFirebaseGoogleLogin() {
+            if (isFirebaseConfigured) {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
+
+                    const result = await firebase.auth().signInWithPopup(provider);
+                    const user = result.user;
+                    const idToken = await user.getIdToken();
+
+                    await sendFirebaseTokenToServer({
+                        idToken: idToken,
+                        email: user.email,
+                        fullName: user.displayName,
+                        photoUrl: user.photoURL,
+                        firebaseUid: user.uid
+                    });
+                } catch (error) {
+                    console.error("Firebase Auth Error:", error);
+                    let userMsg = error.message;
+
+                    if (error.code === 'auth/operation-not-allowed') {
+                        userMsg = "Chưa bật Google Sign-in trong Firebase Console. Hãy vào: Firebase Console -> Authentication -> Sign-in method -> Bật Google!";
+                    } else if (error.code === 'auth/unauthorized-domain') {
+                        userMsg = "Domain hiện tại chưa được cấp quyền trong Firebase Console (Authentication -> Settings -> Authorized domains).";
+                    } else if (error.code === 'auth/popup-closed-by-user') {
+                        userMsg = "Bạn đã đóng cửa sổ đăng nhập Google.";
+                    } else if (error.code === 'auth/popup-blocked') {
+                        userMsg = "Trình duyệt đã chặn cửa sổ Popup. Vui lòng cho phép popup để tiếp tục.";
+                    }
+
+                    toastr.error(userMsg, "Lỗi đăng ký qua Google", { timeOut: 7000 });
+                }
+            } else {
+                Swal.fire({
+                    title: '🌐 Đăng ký qua Google (Firebase)',
+                    html: `
+                        <div class="text-start small">
+                            <label class="form-label fw-bold">Email Google:</label>
+                            <input id="swalGoogleEmailReg" class="form-control mb-2" value="user.moi@gmail.com" />
+                            <label class="form-label fw-bold">Họ và tên:</label>
+                            <input id="swalGoogleNameReg" class="form-control mb-2" value="Người Dùng Mới" />
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Tạo tài khoản qua Google',
+                    confirmButtonColor: '#10b981',
+                    preConfirm: () => {
+                        const email = document.getElementById('swalGoogleEmailReg').value;
+                        const name = document.getElementById('swalGoogleNameReg').value;
+                        if (!email) Swal.showValidationMessage('Vui lòng nhập email');
+                        return { email, fullName: name };
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await sendFirebaseTokenToServer({
+                            idToken: "MOCK_FIREBASE_GOOGLE_TOKEN",
+                            email: result.value.email,
+                            fullName: result.value.fullName,
+                            photoUrl: "/images/default-avatar.png",
+                            firebaseUid: "firebase_uid_" + Date.now()
+                        });
+                    }
+                });
+            }
+        }
+
+        async function sendFirebaseTokenToServer(payload) {
+            try {
+                toastr.info("Đang khởi tạo tài khoản qua Firebase...");
+                const response = await fetch('/Account/FirebaseLogin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    toastr.success(data.message || "Đăng ký thành công!");
+                    setTimeout(() => {
+                        window.location.href = data.redirectUrl || "/Account/Profile";
+                    }, 800);
+                } else {
+                    toastr.error(data.message || "Thất bại.");
+                }
+            } catch (err) {
+                toastr.error("Lỗi kết nối máy chủ xác thực.");
+            }
+        }
+    </script>
+}
