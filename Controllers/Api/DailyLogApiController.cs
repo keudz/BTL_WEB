@@ -55,8 +55,19 @@ namespace BTL_WEB.Controllers.Api
                 .Where(d => d.UserId == userId && d.LogDate.Date == targetDate)
                 .ToListAsync();
 
-            // Định nghĩa sẵn 4 loại bữa ăn chuẩn
-            var mealTypes = new[] { "Breakfast", "Lunch", "Dinner", "Snack" };
+            // Định nghĩa các mốc thời gian ăn uống trong ngày theo Schema
+            var timelineSlots = new[]
+            {
+                new { Type = "Breakfast", Time = "07:00", Name = "Bữa sáng sớm" },
+                new { Type = "MorningCoffee", Time = "08:30", Name = "Cà phê & ăn nhẹ" },
+                new { Type = "MorningSnack", Time = "10:00", Name = "Bữa phụ sáng" },
+                new { Type = "Lunch", Time = "12:00", Name = "Bữa trưa" },
+                new { Type = "AfternoonSnack", Time = "14:30", Name = "Bữa phụ chiều" },
+                new { Type = "PreWorkout", Time = "16:30", Name = "Năng lượng trước tập" },
+                new { Type = "Dinner", Time = "18:30", Name = "Bữa tối" },
+                new { Type = "LateSnack", Time = "20:30", Name = "Ăn nhẹ tối" }
+            };
+
             var mealsResult = new List<object>();
 
             int totalConsumedCalories = 0;
@@ -65,19 +76,23 @@ namespace BTL_WEB.Controllers.Api
             double totalFat = 0;
             int redMealCalories = 0;
 
-            foreach (var type in mealTypes)
+            foreach (var slot in timelineSlots)
             {
-                var log = logs.FirstOrDefault(l => l.MealType == type);
+                // Cho phép map cả "Snack" vào "AfternoonSnack" để tương thích dữ liệu cũ
+                var log = logs.FirstOrDefault(l => l.MealType == slot.Type || (slot.Type == "AfternoonSnack" && l.MealType == "Snack"));
                 int mealCalories = log?.TotalMealCalories ?? 0;
                 totalConsumedCalories += mealCalories;
 
-                // Tính toán Đèn giao thông động
                 string dynamicLight = _trafficLightEngine.GetDynamicMealTrafficLight(mealCalories, targetDailyCalories, mealsPerDay);
 
                 if (dynamicLight == "RED")
                 {
                     redMealCalories += mealCalories;
                 }
+
+                double slotProtein = 0;
+                double slotCarbs = 0;
+                double slotFat = 0;
 
                 var items = log != null 
                     ? log.LogItems.Select(li => (object)new
@@ -98,16 +113,24 @@ namespace BTL_WEB.Controllers.Api
 
                 if (log != null)
                 {
-                    totalProtein += log.LogItems.Sum(i => i.CalculatedProtein);
-                    totalCarbs += log.LogItems.Sum(i => i.CalculatedCarbs);
-                    totalFat += log.LogItems.Sum(i => i.CalculatedFat);
+                    slotProtein = Math.Round(log.LogItems.Sum(i => i.CalculatedProtein), 1);
+                    slotCarbs = Math.Round(log.LogItems.Sum(i => i.CalculatedCarbs), 1);
+                    slotFat = Math.Round(log.LogItems.Sum(i => i.CalculatedFat), 1);
+
+                    totalProtein += slotProtein;
+                    totalCarbs += slotCarbs;
+                    totalFat += slotFat;
                 }
 
                 mealsResult.Add(new
                 {
-                    mealType = type,
-                    mealName = GetMealVietnameseName(type),
+                    mealType = slot.Type,
+                    mealTime = slot.Time,
+                    mealName = slot.Name,
                     mealCalories,
+                    protein = slotProtein,
+                    carbs = slotCarbs,
+                    fat = slotFat,
                     mealTrafficLightDynamic = dynamicLight,
                     items
                 });

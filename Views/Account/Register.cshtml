@@ -30,7 +30,7 @@
                         <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                         <path fill="none" d="M0 0h48v48H0z"/>
                     </svg>
-                    <span class="fw-semibold">Đăng ký nhanh với Google (Firebase)</span>
+                    <span class="fw-semibold">Đăng ký nhanh với Google</span>
                 </button>
 
                 <div class="my-3 text-center position-relative">
@@ -165,7 +165,7 @@
                 }
             } else {
                 Swal.fire({
-                    title: '🌐 Đăng ký qua Google (Firebase)',
+                    title: '🌐 Đăng ký qua Google',
                     html: `
                         <div class="text-start small">
                             <label class="form-label fw-bold">Email Google:</label>
@@ -199,7 +199,7 @@
 
         async function sendFirebaseTokenToServer(payload) {
             try {
-                toastr.info("Đang khởi tạo tài khoản qua Firebase...");
+                toastr.info("Đang khởi tạo tài khoản qua Google...");
                 const response = await fetch('/Account/FirebaseLogin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

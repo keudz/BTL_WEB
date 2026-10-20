@@ -1,109 +1,567 @@
+@model BTL_WEB.Models.ViewModels.HomeDashboardViewModel
 @{
-    ViewData["Title"] = "Trang Chủ - Trợ Lý Calo Thông Minh";
+    ViewData["Title"] = Model.IsAuthenticated ? "Bảng Điều Khiển - KIT Calorie" : "Trang Chủ - Trợ Lý Calo Thông Minh";
+    var todayStr = DateTime.Now.ToString("dd 'Thg' MM");
+    var progressOffset = 408.4 - (408.4 * Math.Min(100.0, Model.ProgressPercent) / 100.0);
 }
 
-<div class="container py-4">
-    <!-- Hero Section -->
-    <div class="kit-card p-4 p-md-5 mb-5 shadow-sm border-0 position-relative overflow-hidden" 
-         style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #ffffff 100%); border-left: 6px solid #10b981 !important;">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <span class="badge badge-tl-green px-3 py-2 mb-3">
-                    🥗 GIẢI PHÁP DINH DƯỠNG THỜI ĐẠI MỚI
-                </span>
-                <h1 class="fw-extrabold display-5 text-dark mb-3">
-                    Không chỉ đếm Calo.<br>
-                    Đây là <span class="text-success">Trợ Lý Ăn Uống Thông Minh</span> của bạn.
-                </h1>
-                <p class="text-muted fs-6 mb-4 col-md-10">
-                    Giải quyết triệt để <strong>Decision Fatigue</strong> (căng thẳng khi cân đo từng gam), <strong>chống lãng phí thực phẩm</strong> trong tủ lạnh và hỗ trợ <strong>nhận diện món ăn Việt bằng AI Gemini</strong>.
-                </p>
+@if (!Model.IsAuthenticated)
+{
+    <!-- ========================================== -->
+    <!-- MÀN HÌNH CHƯA ĐĂNG NHẬP (ẢNH 1 - LANDING PAGE) -->
+    <!-- ========================================== -->
+    <div class="container py-4">
+        <!-- Hero Section -->
+        <div class="kit-card p-4 p-md-5 mb-5 shadow-sm border-0 position-relative overflow-hidden" 
+             style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #ffffff 100%); border-left: 6px solid #10b981 !important;">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge badge-tl-green px-3 py-2 mb-3">
+                        🥗 GIẢI PHÁP DINH DƯỠNG THỜI ĐẠI MỚI
+                    </span>
+                    <h1 class="fw-extrabold display-5 text-dark mb-3">
+                        Không chỉ đếm Calo.<br>
+                        Đây là <span class="text-success">Trợ Lý Ăn Uống Thông Minh</span> của bạn.
+                    </h1>
+                    <p class="text-muted fs-6 mb-4 col-md-10">
+                        Giải quyết triệt để <strong>Decision Fatigue</strong> (căng thẳng khi cân đo từng gam), <strong>chống lãng phí thực phẩm</strong> trong tủ lạnh và hỗ trợ <strong>nhận diện món ăn Việt bằng AI Gemini</strong>.
+                    </p>
 
-                <div class="d-flex flex-wrap gap-3">
-                    <a asp-controller="DailyLog" asp-action="Index" class="btn btn-kit-primary px-4 py-2 fw-semibold">
-                        <i class="bi bi-journal-plus me-1"></i> Nhật ký hôm nay
-                    </a>
-                    <a asp-controller="Fridge" asp-action="Index" class="btn btn-outline-success px-4 py-2 fw-semibold bg-white">
-                        <i class="bi bi-snow me-1"></i> Mở Tủ lạnh ảo
-                    </a>
-                    <a asp-controller="AiScanner" asp-action="Index" class="btn btn-warning px-4 py-2 fw-semibold shadow-sm">
-                        <i class="bi bi-camera-fill me-1"></i> Quét ảnh AI <span class="badge bg-dark ms-1">PRO</span>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-kit-primary px-4 py-2 fw-semibold">
+                            <i class="bi bi-journal-plus me-1"></i> Nhật ký hôm nay
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-success px-4 py-2 fw-semibold bg-white">
+                            <i class="bi bi-snow me-1"></i> Mở Tủ lạnh ảo
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-warning px-4 py-2 fw-semibold shadow-sm text-dark">
+                            <i class="bi bi-camera-fill me-1"></i> Quét ảnh AI <span class="badge bg-dark text-white ms-1">PRO</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center d-none d-lg-block">
+                    <div class="display-1">🍲</div>
+                    <div class="badge badge-tl-green fs-6 px-3 py-2 mt-2 shadow-sm">🟢 Xanh &bull; 🟡 Vàng &bull; 🔴 Đỏ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Trụ Cột Đột Phá -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-success">
+                    <div class="fs-1 text-success mb-2">🚦</div>
+                    <h5 class="fw-bold">Hệ Thống Đèn Giao Thông</h5>
+                    <p class="text-muted small mb-3">
+                        Giảm gánh nặng tâm lý khi ăn kiêng. Phân loại màu sắc trực quan (Xanh: ăn thoải mái, Vàng: vừa phải, Đỏ: kiểm soát) gắn với từng món và % calo bữa ăn.
+                    </p>
+                    <a asp-controller="Account" asp-action="Login" class="text-success fw-bold small text-decoration-none">
+                        Xem cách tính Đèn giao thông <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
-            <div class="col-lg-4 text-center d-none d-lg-block">
-                <div class="display-1">🍲</div>
-                <div class="badge badge-tl-green fs-6 px-3 py-2 mt-2 shadow-sm">🟢 Xanh &bull; 🟡 Vàng &bull; 🔴 Đỏ</div>
+
+            <div class="col-md-4">
+                <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-warning">
+                    <div class="fs-1 text-warning mb-2">❄️</div>
+                    <h5 class="fw-bold">Tủ Lạnh Ảo & Chống Lãng Phí</h5>
+                    <p class="text-muted small mb-3">
+                        Tác vụ ngầm tự động quét nguyên liệu có hạn dùng ≤ 48 giờ mỗi ngày, gửi cảnh báo kèm gợi ý công thức chế biến nhanh để tiết kiệm kinh tế.
+                    </p>
+                    <a asp-controller="Account" asp-action="Login" class="text-warning-emphasis fw-bold small text-decoration-none">
+                        Kiểm tra hạn đồ ăn <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-primary">
+                    <div class="fs-1 text-primary mb-2">🤖</div>
+                    <h5 class="fw-bold">Trợ Lý AI Vision Assistant</h5>
+                    <p class="text-muted small mb-3">
+                        Tích hợp Google Gemini: Chụp ảnh mâm cơm để tự động ước tính calo và khớp với Thư viện món ăn Việt Nam chuẩn xác mà không cần gõ tìm kiếm thủ công.
+                    </p>
+                    <a asp-controller="Account" asp-action="Login" class="text-primary fw-bold small text-decoration-none">
+                        Trải nghiệm Quét ảnh AI <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng Điều Khiển Lối Tắt Demo -->
+        <div class="kit-card p-4 shadow-sm">
+            <h5 class="fw-bold mb-3"><i class="bi bi-compass text-success me-2"></i>Lối Tắt Nhanh Cho Buổi Báo Cáo / Demo:</h5>
+            <div class="row g-2">
+                <div class="col-sm-6 col-lg-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary w-100 text-start py-2">
+                        <i class="bi bi-journal-check me-2 text-success"></i>1. Nhật ký Calo theo giờ
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary w-100 text-start py-2">
+                        <i class="bi bi-snow me-2 text-info"></i>2. Tủ lạnh ảo (Cảnh báo 48h)
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary w-100 text-start py-2">
+                        <i class="bi bi-camera me-2 text-warning"></i>3. Quét ảnh Gemini AI (Pro)
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary w-100 text-start py-2">
+                        <i class="bi bi-graph-up me-2 text-primary"></i>4. Biểu đồ cân nặng & BMI
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+}
+else
+{
+    <!-- ======================================================= -->
+    <!-- MÀN HÌNH ĐÃ ĐĂNG NHẬP (ẢNH 2 - RESPONSIVE MOBILE & DESKTOP) -->
+    <!-- ======================================================= -->
+    <div class="container py-3 py-lg-4" style="max-width: 1100px;">
+        <!-- Top Greeting Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3 mb-lg-4">
+            <div>
+                <div class="text-uppercase text-muted fw-bold" style="font-size: 0.72rem; letter-spacing: 0.6px;">
+                    HÔM NAY, @todayStr.ToUpper()
+                </div>
+                <h3 class="fw-extrabold mb-0 text-dark" style="letter-spacing: -0.5px;">
+                    Chào @Model.FullName! 🌿
+                </h3>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <!-- Streak Badge -->
+                <div class="badge rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-xs border"
+                     style="background-color: #fdf2f2; color: #b91c1c; font-size: 0.78rem; font-weight: 700;">
+                    <span>🔥</span>
+                    <span>@Model.StreakDays ngày chuỗi</span>
+                </div>
 
-    <!-- 3 Trụ Cột Đột Phá -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-success">
-                <div class="fs-1 text-success mb-2">🚦</div>
-                <h5 class="fw-bold">Hệ Thống Đèn Giao Thông</h5>
-                <p class="text-muted small mb-3">
-                    Giảm gánh nặng tâm lý khi ăn kiêng. Phân loại màu sắc trực quan (Xanh: ăn thoải mái, Vàng: vừa phải, Đỏ: kiểm soát) gắn với từng món và % calo bữa ăn.
-                </p>
-                <a asp-controller="DailyLog" asp-action="Index" class="text-success fw-bold small text-decoration-none">
-                    Xem cách tính Đèn giao thông <i class="bi bi-arrow-right"></i>
+                <!-- Notification Bell -->
+                <a asp-controller="Fridge" asp-action="Index" class="btn btn-sm btn-light border rounded-circle position-relative p-2 text-dark shadow-xs" style="width: 38px; height: 38px;" title="Thông báo">
+                    <i class="bi bi-bell fs-6"></i>
+                    @if (Model.UnreadNotificationCount > 0)
+                    {
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                            @Model.UnreadNotificationCount
+                        </span>
+                    }
+                </a>
+
+                <!-- Avatar Circle -->
+                <a asp-controller="Account" asp-action="Profile" class="rounded-circle d-flex align-items-center justify-content-center text-decoration-none fw-bold shadow-xs border"
+                   style="width: 38px; height: 38px; background-color: #e5efe7; color: #1e3f20; font-size: 0.95rem;">
+                    @Model.AvatarLetter
                 </a>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-warning">
-                <div class="fs-1 text-warning mb-2">❄️</div>
-                <h5 class="fw-bold">Tủ Lạnh Ảo & Chống Lãng Phí</h5>
-                <p class="text-muted small mb-3">
-                    Tác vụ ngầm (Cron Job) tự động quét nguyên liệu có hạn dùng ≤ 48 giờ mỗi ngày, gửi cảnh báo kèm gợi ý công thức chế biến nhanh để tiết kiệm kinh tế.
-                </p>
-                <a asp-controller="Fridge" asp-action="Index" class="text-warning-emphasis fw-bold small text-decoration-none">
-                    Kiểm tra hạn đồ ăn <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
+        <!-- Responsive Layout: Col-lg-8 (Left) & Col-lg-4 (Right Sidebar on Desktop) -->
+        <div class="row g-4">
+            <!-- Left Main Column (Cột chính) -->
+            <div class="col-lg-7 col-xl-8">
+                <!-- Main Card: Mục tiêu dinh dưỡng hôm nay -->
+                <div class="kit-card p-4 mb-3 position-relative shadow-sm">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                MỤC TIÊU DINH DƯỠNG HÔM NAY
+                            </div>
+                            <div class="fw-bold text-success" style="font-size: 0.95rem;">
+                                Mục tiêu: @Model.GoalDisplay
+                            </div>
+                        </div>
+                        <a asp-controller="Fridge" asp-action="Index" class="btn btn-sm btn-outline-success fw-bold text-uppercase px-2 py-1 rounded-3" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                            CHỢ SÁNG FIT
+                        </a>
+                    </div>
 
-        <div class="col-md-4">
-            <div class="kit-card kit-card-hover p-4 h-100 shadow-sm border-top border-4 border-primary">
-                <div class="fs-1 text-primary mb-2">🤖</div>
-                <h5 class="fw-bold">Trợ Lý AI Vision Assistant</h5>
-                <p class="text-muted small mb-3">
-                    Tích hợp Google Gemini: Chụp ảnh mâm cơm để tự động ước tính calo và khớp với Thư viện món ăn Việt Nam chuẩn xác mà không cần gõ tìm kiếm thủ công.
-                </p>
-                <a asp-controller="AiScanner" asp-action="Index" class="text-primary fw-bold small text-decoration-none">
-                    Trải nghiệm Quét ảnh AI <i class="bi bi-arrow-right"></i>
-                </a>
+                    <!-- Calorie Circle & Breakdown Row -->
+                    <div class="row align-items-center g-3 mb-4">
+                        <!-- Circular Calorie Gauge -->
+                        <div class="col-sm-6 text-center">
+                            <div class="position-relative d-inline-block" style="width: 155px; height: 155px;">
+                                <svg viewBox="0 0 160 160" style="width: 155px; height: 155px; transform: rotate(-90deg);">
+                                    <circle cx="80" cy="80" r="65" fill="none" stroke="#ede8df" stroke-width="14" />
+                                    <circle cx="80" cy="80" r="65" fill="none" stroke="#1e3f20" stroke-width="14"
+                                            stroke-dasharray="408.4" stroke-dashoffset="@progressOffset"
+                                            stroke-linecap="round" style="transition: stroke-dashoffset 1s ease;" />
+                                </svg>
+                                <div class="position-absolute top-50 start-50 translate-middle text-center" style="width: 100%;">
+                                    <div class="display-6 fw-extrabold text-dark mb-0" style="line-height: 1;">
+                                        @Model.RemainingCalories
+                                    </div>
+                                    <div class="text-uppercase text-muted fw-bold mt-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">
+                                        CALO CÒN LẠI
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Breakdown List -->
+                        <div class="col-sm-6">
+                            <div class="d-flex flex-column gap-2" style="font-size: 0.85rem;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="rounded-circle" style="width: 10px; height: 10px; background-color: #94a3b8;"></span>
+                                    <div>
+                                        <span class="text-muted small d-block" style="font-size: 0.72rem;">Mục tiêu ngày</span>
+                                        <strong class="text-dark">@Model.TargetCalories kcal</strong>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="rounded-circle" style="width: 10px; height: 10px; background-color: #1e3f20;"></span>
+                                    <div>
+                                        <span class="text-muted small d-block" style="font-size: 0.72rem;">Đã nạp vào</span>
+                                        <strong class="text-success">@Model.ConsumedCalories kcal</strong>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between p-2 rounded-3 border" style="background-color: #fff5f5; border-color: #fecdd3 !important; cursor: pointer;" onclick="openWorkoutModal()" title="Nhấn để tính calo thể thao">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="rounded-circle" style="width: 10px; height: 10px; background-color: #dc2626;"></span>
+                                        <div>
+                                            <span class="text-muted small d-block" style="font-size: 0.72rem;">Vận động đốt</span>
+                                            <strong class="text-danger" id="displayBurnedCalories">@Model.BurnedCalories kcal</strong>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill px-2 py-1 small" style="font-size: 0.7rem;">+ Tính calo 🔥</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Macro Cards (Protein, Carb, Fat) -->
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="p-2 rounded-4 text-center border" style="background-color: #fbf9f4; border-color: #ede8df !important;">
+                                <div class="text-muted small mb-1" style="font-size: 0.72rem;">Đạm (Protein)</div>
+                                <div class="fw-extrabold fs-5 mb-0" style="color: #ea580c;">@((int)Model.TotalProtein)g</div>
+                                <div class="text-muted" style="font-size: 0.68rem;">Mục tiêu @((int)Model.TargetProtein)g</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded-4 text-center border" style="background-color: #fbf9f4; border-color: #ede8df !important;">
+                                <div class="text-muted small mb-1" style="font-size: 0.72rem;">Tinh bột (Carb)</div>
+                                <div class="fw-extrabold fs-5 mb-0" style="color: #d97706;">@((int)Model.TotalCarbs)g</div>
+                                <div class="text-muted" style="font-size: 0.68rem;">Mục tiêu @((int)Model.TargetCarbs)g</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded-4 text-center border" style="background-color: #fbf9f4; border-color: #ede8df !important;">
+                                <div class="text-muted small mb-1" style="font-size: 0.72rem;">Chất béo (Fat)</div>
+                                <div class="fw-extrabold fs-5 mb-0 text-dark">@((int)Model.TotalFat)g</div>
+                                <div class="text-muted" style="font-size: 0.68rem;">Mục tiêu @((int)Model.TargetFat)g</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5 Quick Action Cards Row (Bao gồm Đốt Calo) -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-sm">
+                        <a asp-controller="DailyLog" asp-action="Index" class="kit-card p-3 text-center text-decoration-none d-flex flex-column align-items-center justify-content-center h-100 shadow-xs" style="border-radius: 18px;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 42px; height: 42px; background-color: #f1f5f2;">
+                                <i class="bi bi-pencil-square fs-5 text-success"></i>
+                            </div>
+                            <span class="fw-bold text-dark small" style="font-size: 0.78rem;">Nhập món</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-sm">
+                        <a asp-controller="AiScanner" asp-action="Index" class="kit-card p-3 text-center text-decoration-none d-flex flex-column align-items-center justify-content-center h-100 shadow-xs" style="border-radius: 18px;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 42px; height: 42px; background-color: #fff9ea;">
+                                <i class="bi bi-camera fs-5 text-warning"></i>
+                            </div>
+                            <span class="fw-bold text-dark small" style="font-size: 0.78rem;">Quét AI</span>
+                        </a>
+                    </div>
+                    <div class="col-4 col-sm">
+                        <button type="button" onclick="openWorkoutModal()" class="kit-card p-3 text-center text-decoration-none d-flex flex-column align-items-center justify-content-center h-100 shadow-xs w-100 border-0" style="border-radius: 18px;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 42px; height: 42px; background-color: #fee2e2;">
+                                <i class="bi bi-fire fs-5 text-danger"></i>
+                            </div>
+                            <span class="fw-bold text-dark small" style="font-size: 0.78rem;">Đốt Calo 🔥</span>
+                        </button>
+                    </div>
+                    <div class="col-4 col-sm">
+                        <a asp-controller="Fridge" asp-action="Index" class="kit-card p-3 text-center text-decoration-none d-flex flex-column align-items-center justify-content-center h-100 shadow-xs position-relative" style="border-radius: 18px;">
+                            @if (Model.FridgeItemCount > 0)
+                            {
+                                <span class="position-absolute top-0 end-0 translate-middle badge rounded-circle bg-danger mt-3 me-3" style="width: 18px; height: 18px; font-size: 0.65rem; padding: 2px;">
+                                    @Model.FridgeItemCount
+                                </span>
+                            }
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 42px; height: 42px; background-color: #eaf3ed;">
+                                <i class="bi bi-journal-bookmark fs-5 text-success"></i>
+                            </div>
+                            <span class="fw-bold text-dark small" style="font-size: 0.78rem;">Tủ lạnh</span>
+                        </a>
+                    </div>
+                    <div class="col-4 col-sm">
+                        <button type="button" onclick="logQuickWater()" class="kit-card p-3 text-center text-decoration-none d-flex flex-column align-items-center justify-content-center h-100 shadow-xs w-100 border-0" style="border-radius: 18px;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 42px; height: 42px; background-color: #e0f2fe;">
+                                <i class="bi bi-droplet-fill fs-5 text-primary"></i>
+                            </div>
+                            <span class="fw-bold text-dark small" style="font-size: 0.78rem;">+250ml</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bữa Ăn Đã Ghi (Hiển thị ngay dưới trên Mobile - khớp Ảnh 2) -->
+                <div class="d-lg-none">
+                    <div class="kit-card p-4 shadow-sm mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e3f20" stroke-width="2"><path d="M18 2v20M18 8a3 3 0 0 1-3-3V2M6 2v7a3 3 0 0 0 3 3h0a3 3 0 0 0 3-3V2M9 12v10"/></svg>
+                                <h6 class="fw-extrabold mb-0 text-dark">Bữa Ăn Đã Ghi (@Model.TodayLoggedItems.Count món)</h6>
+                            </div>
+                            <a asp-controller="DailyLog" asp-action="Index" class="text-muted small fw-semibold text-decoration-none">
+                                Xem timeline <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+                            </a>
+                        </div>
+
+                        @if (Model.TodayLoggedItems.Any())
+                        {
+                            <div class="d-flex flex-column gap-3">
+                                @foreach (var item in Model.TodayLoggedItems)
+                                {
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="rounded-circle" style="width: 8px; height: 8px; background-color: #10b981;"></span>
+                                            <span class="fw-bold text-dark" style="font-size: 0.9rem;">@item.FoodName</span>
+                                            <span class="text-muted small" style="font-size: 0.8rem;">(@item.ServingSize)</span>
+                                        </div>
+                                        <span class="fw-bold text-dark" style="font-size: 0.9rem;">@item.Calories Kcal</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-calendar-x fs-2 d-block mb-2 text-muted"></i>
+                                <p class="small mb-2">Chưa có món ăn nào được ghi nhận hôm nay.</p>
+                                <a asp-controller="DailyLog" asp-action="Index" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
+                                    + Ghi món vào timeline
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Vận Động Thể Thao Đã Đốt (Mobile) -->
+                    <div class="kit-card p-4 shadow-sm mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fs-5">🔥</span>
+                                <h6 class="fw-extrabold mb-0 text-dark">Vận Động Đã Đốt (@Model.TodayWorkouts.Count)</h6>
+                            </div>
+                            <button type="button" onclick="openWorkoutModal()" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                                + Tính calo
+                            </button>
+                        </div>
+
+                        @if (Model.TodayWorkouts.Any())
+                        {
+                            <div class="d-flex flex-column gap-2">
+                                @foreach (var workout in Model.TodayWorkouts)
+                                {
+                                    <div class="d-flex justify-content-between align-items-center p-2 rounded-3 bg-white border" style="border-color: #ede8df !important;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fs-4">@workout.ActivityIcon</span>
+                                            <div>
+                                                <div class="fw-bold text-dark" style="font-size: 0.88rem;">@workout.ActivityName</div>
+                                                <small class="text-muted" style="font-size: 0.72rem;">
+                                                    @workout.DurationMinutes phút &bull; 
+                                                    @(workout.Intensity == "LIGHT" ? "🟢 Nhẹ" : (workout.Intensity == "HIGH" ? "🔴 Cao" : "🟡 Vừa")) &bull; 
+                                                    Lúc @workout.LoggedTime
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-extrabold text-danger" style="font-size: 0.95rem;">-@workout.BurnedCalories kcal</span>
+                                            <button type="button" class="btn btn-sm p-0 text-muted border-0 hover-danger" onclick="deleteWorkoutItem(@workout.Id)" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-3 text-muted">
+                                <span class="fs-3 d-block mb-1">🏃‍♂️</span>
+                                <p class="small mb-2">Chưa ghi nhận vận động nào hôm nay.</p>
+                                <button type="button" onclick="openWorkoutModal()" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                                    + Tính calo đốt thể thao
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar Column (Cột phụ bên phải - Tối ưu Desktop hiển thị cân đối) -->
+            <div class="col-lg-5 col-xl-4 d-none d-lg-block">
+                <!-- Bữa Ăn Đã Ghi Card (Desktop) -->
+                <div class="kit-card p-4 shadow-sm mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e3f20" stroke-width="2"><path d="M18 2v20M18 8a3 3 0 0 1-3-3V2M6 2v7a3 3 0 0 0 3 3h0a3 3 0 0 0 3-3V2M9 12v10"/></svg>
+                            <h6 class="fw-extrabold mb-0 text-dark">Bữa Ăn Đã Ghi (@Model.TodayLoggedItems.Count món)</h6>
+                        </div>
+                        <a asp-controller="DailyLog" asp-action="Index" class="text-muted small fw-semibold text-decoration-none">
+                            Xem timeline <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+                        </a>
+                    </div>
+
+                    @if (Model.TodayLoggedItems.Any())
+                    {
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var item in Model.TodayLoggedItems)
+                            {
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="rounded-circle" style="width: 8px; height: 8px; background-color: #10b981;"></span>
+                                        <span class="fw-bold text-dark" style="font-size: 0.9rem;">@item.FoodName</span>
+                                        <span class="text-muted small" style="font-size: 0.8rem;">(@item.ServingSize)</span>
+                                    </div>
+                                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">@item.Calories Kcal</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-calendar-x fs-2 d-block mb-2 text-muted"></i>
+                            <p class="small mb-2">Chưa có món ăn nào được ghi nhận hôm nay.</p>
+                            <a asp-controller="DailyLog" asp-action="Index" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
+                                + Ghi món vào timeline
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <!-- Vận Động Thể Thao Đã Đốt Card (Desktop) -->
+                <div class="kit-card p-4 shadow-sm mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fs-5">🔥</span>
+                            <h6 class="fw-extrabold mb-0 text-dark">Vận Động Đã Đốt (@Model.TodayWorkouts.Count)</h6>
+                        </div>
+                        <button type="button" onclick="openWorkoutModal()" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                            + Tính calo
+                        </button>
+                    </div>
+
+                    @if (Model.TodayWorkouts.Any())
+                    {
+                        <div class="d-flex flex-column gap-2">
+                            @foreach (var workout in Model.TodayWorkouts)
+                            {
+                                <div class="d-flex justify-content-between align-items-center p-2 rounded-3 bg-white border" style="border-color: #ede8df !important;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fs-4">@workout.ActivityIcon</span>
+                                        <div>
+                                            <div class="fw-bold text-dark" style="font-size: 0.88rem;">@workout.ActivityName</div>
+                                            <small class="text-muted" style="font-size: 0.72rem;">
+                                                @workout.DurationMinutes phút &bull; 
+                                                @(workout.Intensity == "LIGHT" ? "🟢 Nhẹ" : (workout.Intensity == "HIGH" ? "🔴 Cao" : "🟡 Vừa")) &bull; 
+                                                Lúc @workout.LoggedTime
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fw-extrabold text-danger" style="font-size: 0.95rem;">-@workout.BurnedCalories kcal</span>
+                                        <button type="button" class="btn btn-sm p-0 text-muted border-0 hover-danger" onclick="deleteWorkoutItem(@workout.Id)" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3 text-muted">
+                            <span class="fs-3 d-block mb-1">🏃‍♂️</span>
+                            <p class="small mb-2">Chưa ghi nhận bài tập thể thao nào hôm nay.</p>
+                            <button type="button" onclick="openWorkoutModal()" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                                + Tính calo đốt thể thao
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                <!-- Tiện ích Tủ Lạnh & Chống Lãng Phí (Desktop) -->
+                <div class="kit-card p-4 shadow-sm mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-journal-bookmark text-success fs-5"></i>
+                            <h6 class="fw-extrabold mb-0 text-dark">Bếp & Kho Thực Phẩm</h6>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border">@Model.FridgeItemCount nguyên liệu</span>
+                    </div>
+                    <p class="text-muted small mb-3" style="font-size: 0.82rem; line-height: 1.4;">
+                        Tủ lạnh ảo đang theo dõi hạn sử dụng nguyên liệu của bạn để bảo vệ sức khỏe và chống lãng phí.
+                    </p>
+                    <a asp-controller="Fridge" asp-action="Index" class="btn btn-sm btn-outline-success w-100 fw-bold rounded-pill py-2">
+                        Quản lý Tủ Lạnh & Gợi Ý Món
+                    </a>
+                </div>
+
+                <!-- Trợ lý Quét Ảnh AI Card (Desktop) -->
+                <div class="kit-card p-4 shadow-sm" style="background: linear-gradient(135deg, #fff9ea 0%, #ffffff 100%); border-color: #fce8a6 !important;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-stars text-warning fs-5"></i>
+                        <h6 class="fw-extrabold mb-0 text-dark">Trợ Lý AI Vision</h6>
+                    </div>
+                    <p class="text-muted small mb-3" style="font-size: 0.82rem;">
+                        Chụp ảnh mâm cơm để Google Gemini tự động ước tính calo và khớp với Thư viện món ăn Việt Nam.
+                    </p>
+                    <a asp-controller="AiScanner" asp-action="Index" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill w-100 py-2 shadow-xs">
+                        <i class="bi bi-camera me-1"></i> Bật Quét Món Ăn AI
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+}
 
-    <!-- Bảng Điều Khiển Nhanh -->
-    <div class="kit-card p-4 shadow-sm">
-        <h5 class="fw-bold mb-3"><i class="bi bi-compass text-success me-2"></i>Lối Tắt Nhanh Cho Buổi Báo Cáo / Demo:</h5>
-        <div class="row g-2">
-            <div class="col-sm-6 col-lg-3">
-                <a asp-controller="DailyLog" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
-                    <i class="bi bi-journal-check me-2 text-success"></i>1. Nhật ký Calo 4 bữa
-                </a>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <a asp-controller="Fridge" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
-                    <i class="bi bi-snow me-2 text-info"></i>2. Tủ lạnh ảo (Cảnh báo 48h)
-                </a>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <a asp-controller="AiScanner" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
-                    <i class="bi bi-camera me-2 text-warning"></i>3. Quét ảnh Gemini AI (Pro)
-                </a>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <a asp-controller="Food" asp-action="Index" class="btn btn-outline-secondary w-100 text-start py-2">
-                    <i class="bi bi-search me-2 text-primary"></i>4. Tra cứu 35+ món Việt
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+@section Scripts {
+    <script>
+        function logQuickWater() {
+            toastr.success("Đã ghi nhận nạp thêm 250ml nước lọc! 💧", "Uống nước thông minh");
+        }
+
+        async function deleteWorkoutItem(id) {
+            const confirmRes = await Swal.fire({
+                title: 'Xóa bài tập?',
+                text: 'Bạn có chắc chắn muốn xóa bài tập vận động này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Đồng ý xóa',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (confirmRes.isConfirmed) {
+                try {
+                    const res = await fetch(`/api/workoutapi/delete/${id}`, { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                        toastr.success(data.message, "Đã xóa");
+                        setTimeout(() => window.location.reload(), 600);
+                    } else {
+                        toastr.error(data.message || "Không thể xóa bài tập.");
+                    }
+                } catch {
+                    toastr.error("Lỗi mạng khi kết nối máy chủ.");
+                }
+            }
+        }
+    </script>
+}

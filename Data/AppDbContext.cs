@@ -17,6 +17,7 @@ namespace BTL_WEB.Data
         public DbSet<FridgeItem> FridgeItems => Set<FridgeItem>();
         public DbSet<WeightLog> WeightLogs => Set<WeightLog>();
         public DbSet<InAppNotification> Notifications => Set<InAppNotification>();
+        public DbSet<WorkoutLog> WorkoutLogs => Set<WorkoutLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

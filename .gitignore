@@ -1,0 +1,20 @@
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Build results
+[Bb]in/
+[Oo]bj/
+*.dll
+*.exe
+*.pdb
+
+# Logs & temp
+*.log
+_ReSharper*/
+*.VC.db
+*.VC.opendb

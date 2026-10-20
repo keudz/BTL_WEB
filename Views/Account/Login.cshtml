@@ -30,7 +30,7 @@
                         <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                         <path fill="none" d="M0 0h48v48H0z"/>
                     </svg>
-                    <span class="fw-semibold">Đăng nhập với Google (Firebase)</span>
+                    <span class="fw-semibold">Đăng nhập với Google</span>
                 </button>
 
                 <div class="my-3 text-center position-relative">
@@ -76,19 +76,6 @@
                         Chưa có tài khoản? <a asp-action="Register" class="text-success fw-bold text-decoration-none">Đăng ký ngay</a>
                     </div>
                 </form>
-
-                <!-- Shortcut test accounts for Demo -->
-                <div class="mt-4 pt-3 border-top">
-                    <div class="small fw-bold text-muted mb-2 text-center">🎯 Tài khoản kiểm thử / Demo nhanh:</div>
-                    <div class="d-flex flex-column gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-warning text-dark text-start py-1" onclick="fillAccount('prouser', 'Pro@123')">
-                            👑 <strong>User Pro VIP:</strong> <code>prouser</code> / <code>Pro@123</code> (Có AI Vision)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary text-start py-1" onclick="fillAccount('freeuser', 'User@123')">
-                            🌱 <strong>User Free:</strong> <code>freeuser</code> / <code>User@123</code> (Tra cứu & ghi nhật ký)
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -102,11 +89,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
-        function fillAccount(username, password) {
-            document.getElementById("UsernameOrEmail").value = username;
-            document.getElementById("Password").value = password;
-        }
-
         // Khởi tạo Firebase Auth
         const firebaseConfig = {
             apiKey: "@firebaseApiKey",
@@ -179,21 +161,18 @@
             } else {
                 // 2. Chế độ Test nhanh Firebase Token (Khi chưa dán ApiKey thật vào appsettings.json)
                 Swal.fire({
-                    title: '🌐 Đăng nhập Google (Firebase Auth)',
+                    title: '🌐 Đăng nhập Google',
                     html: `
                         <div class="text-start small">
-                            <p class="text-muted mb-2">Hệ thống backend đã sẵn sàng tiếp nhận token từ <strong>Firebase Authentication</strong>.</p>
+                            <p class="text-muted mb-2">Hệ thống đang kết nối tài khoản Google.</p>
                             <label class="form-label fw-bold">Nhập địa chỉ Email Google của bạn để kiểm thử:</label>
                             <input id="swalGoogleEmail" class="form-control mb-2" placeholder="tenban@gmail.com" value="dat.nguyen@gmail.com" />
                             <label class="form-label fw-bold">Họ và tên Google:</label>
                             <input id="swalGoogleName" class="form-control mb-2" placeholder="Tên của bạn" value="Nguyễn Thành Đạt" />
-                            <div class="alert alert-info py-2 px-3 small border-0 mt-2">
-                                💡 <em>Ghi chú: Khi bạn dán ApiKey từ Firebase Console vào <code>appsettings.json</code>, nút này sẽ tự động bật cửa sổ Google Popup thực thụ!</em>
-                            </div>
                         </div>
                     `,
                     showCancelButton: true,
-                    confirmButtonText: '<i class="bi bi-google me-1"></i> Đăng nhập qua Firebase',
+                    confirmButtonText: '<i class="bi bi-google me-1"></i> Đăng nhập bằng Google',
                     cancelButtonText: 'Đóng',
                     confirmButtonColor: '#10b981',
                     preConfirm: () => {
@@ -220,7 +199,7 @@
 
         async function sendFirebaseTokenToServer(payload) {
             try {
-                toastr.info("Đang xác thực tài khoản qua Firebase...");
+                toastr.info("Đang xác thực tài khoản Google...");
                 const response = await fetch('/Account/FirebaseLogin', {
                     method: 'POST',
                     headers: {

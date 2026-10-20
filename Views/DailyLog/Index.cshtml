@@ -1,549 +1,466 @@
 @{
-    ViewData["Title"] = "Nhật ký Dinh dưỡng & Calo";
+    ViewData["Title"] = "Dòng Thời Gian Bữa Ăn - KIT Calorie";
     string selectedDate = ViewBag.SelectedDate ?? DateTime.UtcNow.ToString("yyyy-MM-dd");
 }
 
-<div class="container py-4">
-    <!-- Header & Date Navigation -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <h3 class="fw-bold mb-1">📖 Nhật ký Ăn uống Thông minh</h3>
-            <p class="text-muted small mb-0">Theo dõi năng lượng nạp vào và nhận phản hồi trực quan từ Đèn Giao Thông</p>
+<div class="container py-3 py-lg-4" style="max-width: 780px;">
+    <!-- Top Header: Subtitle & Calendar Button -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-uppercase text-muted fw-bold" style="font-size: 0.72rem; letter-spacing: 0.6px;">
+            HÀNH TRÌNH ĂN UỐNG TRONG NGÀY
         </div>
+        <div class="position-relative">
+            <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1 fw-bold text-dark d-flex align-items-center gap-1 shadow-xs" onclick="document.getElementById('hiddenDatePicker').showPicker()">
+                <i class="bi bi-calendar3 text-success"></i>
+                <span id="calendarYearLabel">Lịch 2026</span>
+            </button>
+            <input type="date" id="hiddenDatePicker" class="position-absolute top-0 start-0 opacity-0 pointer-events-none" value="@selectedDate" onchange="onDateChanged(this.value)" />
+        </div>
+    </div>
+
+    <!-- Date Navigation Row (< Hôm nay, 20 Thg 10 >) -->
+    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <button class="btn btn-light border rounded-circle d-flex align-items-center justify-content-center shadow-xs" style="width: 38px; height: 38px;" onclick="navigateDay(-1)">
+            <i class="bi bi-chevron-left text-dark"></i>
+        </button>
+        <h4 class="fw-extrabold mb-0 text-dark text-center" id="displayDateText" style="letter-spacing: -0.5px;">
+            Hôm nay, @DateTime.Now.ToString("dd 'Thg' MM")
+        </h4>
+        <button class="btn btn-light border rounded-circle d-flex align-items-center justify-content-center shadow-xs" style="width: 38px; height: 38px;" onclick="navigateDay(1)">
+            <i class="bi bi-chevron-right text-dark"></i>
+        </button>
+    </div>
+
+    <!-- Quick Workout Burn Banner -->
+    <div class="kit-card p-3 mb-4 d-flex justify-content-between align-items-center border shadow-xs" style="background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%); border-color: #fed7aa !important; border-radius: 18px;">
         <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-sm btn-outline-secondary rounded-circle" id="prevDayBtn" title="Hôm trước">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <input type="date" id="logDateInput" class="form-control form-control-sm fw-bold text-center rounded-3" 
-                   value="@selectedDate" style="width: 160px;" />
-            <button class="btn btn-sm btn-outline-secondary rounded-circle" id="nextDayBtn" title="Hôm sau">
-                <i class="bi bi-chevron-right"></i>
-            </button>
-            <button class="btn btn-sm btn-light border rounded-pill px-3" id="todayBtn">Hôm nay</button>
-        </div>
-    </div>
-
-    <!-- Alert Cảnh báo Tỷ lệ Món/Bữa ĐỎ -->
-    <div id="redRatioAlert" class="alert alert-danger d-none rounded-4 border-0 shadow-sm mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <div class="fs-2 text-danger">⚠️</div>
+            <span class="rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; background-color: #fee2e2; color: #dc2626; font-size: 1.25rem;">
+                🔥
+            </span>
             <div>
-                <h6 class="fw-bold mb-1 text-danger">Cảnh báo: Tỷ lệ năng lượng từ món Đỏ vượt quá 40%!</h6>
-                <div class="small text-danger-emphasis">
-                    Hôm nay bạn đang nạp nhiều thực phẩm giàu năng lượng, dầu mỡ hoặc đường. Hãy bổ sung thêm các món nhóm 🟢 Xanh (rau xanh, canh thanh đạm, ức gà luộc) để cân bằng đường ruột và duy trì thâm hụt calo!
-                </div>
+                <strong class="text-dark d-block" style="font-size: 0.9rem;">Hôm nay bạn có tập thể dục không?</strong>
+                <span class="text-muted small" style="font-size: 0.75rem;">Tính calo đốt theo môn thể thao, cường độ & thời gian</span>
             </div>
         </div>
+        <button type="button" class="btn btn-sm btn-danger fw-bold rounded-pill px-3 py-2 shadow-xs d-flex align-items-center gap-1" onclick="openWorkoutModal()">
+            <i class="bi bi-fire"></i>
+            <span>+ Tính Calo Đốt</span>
+        </button>
     </div>
 
-    <!-- Khối Tổng quan Calo & Macro (Wao Inspired Dashboard) -->
-    <div class="kit-card p-4 p-md-4 mb-4 shadow-sm border-0 position-relative overflow-hidden" 
-         style="background: linear-gradient(145deg, #ffffff 0%, #fbfdfc 100%);">
-        <div class="row align-items-center g-4">
-            <!-- Vòng tròn Calo Trọng tâm (Wao Circular Gauge) -->
-            <div class="col-lg-5 col-xl-4 text-center">
-                <div class="wao-circle-wrapper">
-                    <svg class="wao-circle-svg" viewBox="0 0 180 180">
-                        <circle class="wao-circle-bg" cx="90" cy="90" r="70" />
-                        <circle id="waoCircleProgress" class="wao-circle-progress" cx="90" cy="90" r="70" 
-                                stroke-dasharray="439.82" stroke-dashoffset="439.82" />
-                    </svg>
-                    <div class="wao-circle-content">
-                        <span class="small text-muted fw-bold text-uppercase d-block" style="letter-spacing: 0.5px; font-size: 0.75rem;">Calo còn lại</span>
-                        <div class="display-6 fw-extrabold my-1" id="remainingCalories">0</div>
-                        <span class="badge bg-light text-muted border px-2 py-0 fw-semibold" style="font-size: 0.75rem;">kcal</span>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-center gap-3 mt-3 pt-2 border-top">
-                    <div class="small">
-                        <span class="text-muted d-block" style="font-size: 0.75rem;">Mục tiêu</span>
-                        <strong class="text-dark" id="targetCalories">0</strong> <span class="text-muted" style="font-size: 0.7rem;">kcal</span>
-                    </div>
-                    <div class="vr"></div>
-                    <div class="small">
-                        <span class="text-muted d-block" style="font-size: 0.75rem;">Đã nạp</span>
-                        <strong class="text-success" id="consumedCalories">0</strong> <span class="text-muted" style="font-size: 0.7rem;">kcal</span>
-                    </div>
-                    <div class="vr"></div>
-                    <div class="small">
-                        <span class="text-muted d-block" style="font-size: 0.75rem;">Đã đạt</span>
-                        <strong class="text-primary" id="calorieProgressText">0%</strong>
-                    </div>
-                </div>
-                <!-- Hidden progress bar for legacy script compatibility -->
-                <div class="kit-progress-wrapper d-none">
-                    <div id="calorieProgressBar" class="kit-progress-fill bg-success" style="width: 0%;"></div>
-                </div>
+    <!-- Timeline Main Card: Dòng Thời Gian Bữa Ăn Theo Giờ -->
+    <div class="kit-card p-4 shadow-sm mb-4">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-clock text-success fs-5"></i>
+                <h5 class="fw-extrabold mb-0 text-dark" style="letter-spacing: -0.3px;">
+                    Dòng Thời Gian Bữa Ăn<br>Theo Giờ
+                </h5>
             </div>
-
-            <!-- 3 Thẻ Macronutrients (Carb, Protein, Fat - Chuẩn Wao) -->
-            <div class="col-lg-7 col-xl-8">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
-                        <i class="bi bi-pie-chart-fill me-1 text-success"></i> Tỉ lệ 3 chất Đa lượng (Macros)
-                    </span>
-                    <span class="badge bg-light text-muted border small">Hấp thụ trong ngày</span>
-                </div>
-
-                <div class="row g-3">
-                    <!-- Carb -->
-                    <div class="col-sm-4">
-                        <div class="macro-card macro-card-carb h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold small">🍚 Tinh bột (Carb)</span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-1 my-1">
-                                <h4 class="fw-extrabold mb-0" id="totalCarbs">0g</h4>
-                                <span class="small text-muted" id="carbTargetText" style="font-size: 0.75rem;">/ 250g</span>
-                            </div>
-                            <div class="macro-progress-track">
-                                <div id="carbProgressBar" class="macro-progress-fill" style="width: 0%;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Protein -->
-                    <div class="col-sm-4">
-                        <div class="macro-card macro-card-protein h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold small">🥩 Đạm (Protein)</span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-1 my-1">
-                                <h4 class="fw-extrabold mb-0" id="totalProtein">0g</h4>
-                                <span class="small text-muted" id="proteinTargetText" style="font-size: 0.75rem;">/ 110g</span>
-                            </div>
-                            <div class="macro-progress-track">
-                                <div id="proteinProgressBar" class="macro-progress-fill" style="width: 0%;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fat -->
-                    <div class="col-sm-4">
-                        <div class="macro-card macro-card-fat h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold small">🥑 Chất béo (Fat)</span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-1 my-1">
-                                <h4 class="fw-extrabold mb-0" id="totalFat">0g</h4>
-                                <span class="small text-muted" id="fatTargetText" style="font-size: 0.75rem;">/ 55g</span>
-                            </div>
-                            <div class="macro-progress-track">
-                                <div id="fatProgressBar" class="macro-progress-fill" style="width: 0%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Tip -->
-                <div class="mt-3 p-2 px-3 rounded-3 bg-light text-muted small d-flex align-items-center gap-2" style="font-size: 0.8rem;">
-                    <i class="bi bi-info-circle text-success fs-6"></i>
-                    <span>Tỷ lệ chuẩn cho người Việt: <strong>50% Carb</strong> &bull; <strong>25% Protein</strong> &bull; <strong>25% Fat</strong> để giữ vóc dáng bền vững.</span>
-                </div>
+            <div class="text-muted small text-end" style="font-size: 0.75rem; max-width: 140px; line-height: 1.3;">
+                Chạm vào bất kỳ giờ nào để ghi món
             </div>
         </div>
-    </div>
 
-    <!-- 4 Khối Bữa Ăn: Sáng, Trưa, Tối, Ăn Vặt -->
-    <div class="row g-4" id="mealsContainer">
-        <!-- Render động qua JavaScript -->
+        <!-- Vertical Timeline Container -->
+        <div class="timeline-container position-relative ps-3" id="timelineList">
+            <!-- Render động bằng AJAX -->
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-success" role="status"></div>
+                <div class="small mt-2">Đang tải nhật ký hành trình...</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Modal Thêm Món Vào Bữa Ăn -->
-<div class="modal fade" id="addMealItemModal" tabindex="-1" aria-labelledby="addMealItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+<!-- Modal Thêm Món Vào Giờ Chọn -->
+<div class="modal fade" id="addMealModal" tabindex="-1" aria-labelledby="addMealModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-header border-0 pb-0">
-                <div>
-                    <h5 class="modal-title fw-bold" id="addMealItemModalLabel">Thêm món ăn vào bữa</h5>
-                    <div class="text-muted small" id="modalMealSubtitle">Chọn món từ thư viện hoặc tự tạo</div>
-                </div>
+                <h5 class="modal-title fw-bold" id="addMealModalLabel">Ghi món vào bữa ăn</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Search input -->
-                <div class="input-group mb-3">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" id="modalFoodSearch" class="form-control border-start-0" 
-                           placeholder="Gõ tên món để tìm (phở bò, cơm tấm, bánh mì...)" />
+                <input type="hidden" id="modalMealType" />
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Tìm kiếm món ăn trong Thư viện:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="foodSearchInput" class="form-control border-start-0" placeholder="VD: Ức gà, Cơm gạo lứt, Phở..." oninput="debounceFoodSearch()" />
+                    </div>
                 </div>
 
-                <!-- Food Results List -->
-                <div class="overflow-auto border rounded-3 p-2 mb-3" style="max-height: 280px;" id="modalFoodList">
-                    <div class="text-center py-4 text-muted small">Hãy gõ tên món để tìm kiếm...</div>
+                <!-- Food Suggestions List -->
+                <div id="foodSearchResults" class="list-group mb-3" style="max-height: 220px; overflow-y: auto;">
+                    <!-- Render dynamic search results -->
                 </div>
 
-                <!-- Selected Food Config -->
-                <div id="selectedFoodSection" class="p-3 bg-light rounded-3 d-none border">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                <!-- Selected Food Info -->
+                <div id="selectedFoodCard" class="alert alert-success d-none py-2 px-3 mb-3 border-0 rounded-3">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <strong id="selectedFoodName" class="text-dark">Tên món</strong>
-                            <span class="badge bg-secondary ms-2" id="selectedFoodServing">1 phần</span>
+                            <strong id="selectedFoodName" class="d-block"></strong>
+                            <small class="text-muted" id="selectedFoodMeta"></small>
                         </div>
-                        <span id="selectedFoodCalories" class="fw-bold text-success">0 kcal</span>
-                    </div>
-
-                    <div class="row align-items-center g-2 mt-2">
-                        <div class="col-sm-5">
-                            <label class="form-label small fw-semibold text-muted mb-0">Khẩu phần/Số lượng:</label>
-                        </div>
-                        <div class="col-sm-7">
-                            <div class="input-group input-group-sm">
-                                <button class="btn btn-outline-secondary" type="button" onclick="adjustQuantity(-0.5)">-0.5</button>
-                                <input type="number" step="0.5" min="0.1" max="20" class="form-control text-center fw-bold" 
-                                       id="itemQuantityInput" value="1.0" />
-                                <button class="btn btn-outline-secondary" type="button" onclick="adjustQuantity(0.5)">+0.5</button>
-                            </div>
-                        </div>
+                        <input type="hidden" id="selectedFoodId" />
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-kit-primary px-4" id="confirmAddFoodBtn" disabled>
-                    <i class="bi bi-plus-lg me-1"></i> Thêm vào bữa
-                </button>
+
+                <!-- Portion Quantity -->
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Khẩu phần ăn (Số lượng / Gram):</label>
+                    <div class="input-group">
+                        <input type="number" step="0.1" id="foodQuantityInput" class="form-control" value="1.0" min="0.1" max="10" />
+                        <span class="input-group-text bg-white" id="foodServingUnit">phần</span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success rounded-pill px-4 fw-bold" style="background-color: #1e3f20; border-color: #1e3f20;" onclick="submitAddFoodToMeal()">
+                        + Ghi món ngay
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+@section Styles {
+    <style>
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            left: 20px;
+            width: 2px;
+            background: #ede8df;
+            z-index: 1;
+        }
+
+        .timeline-slot {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 24px;
+        }
+
+        .timeline-slot:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-node-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fbf9f4;
+            border: 2px solid #ede8df;
+            display: inline-block;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+
+        .timeline-slot.has-items .timeline-node-dot {
+            background: #1e3f20;
+            border-color: #1e3f20;
+            box-shadow: 0 0 0 4px #e5efe7;
+        }
+
+        .timeline-empty-card {
+            background: #ffffff;
+            border: 1px dashed #ede8df;
+            border-radius: 16px;
+            padding: 10px 14px;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-empty-card:hover {
+            border-color: #1e3f20;
+            background: #fdfcf9;
+        }
+
+        .timeline-filled-card {
+            background: #ffffff;
+            border: 1px solid #ebe5d8;
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .timeline-macro-pill {
+            background-color: #fbf9f4;
+            border: 1px solid #ede8df;
+            border-radius: 12px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+    </style>
+}
+
 @section Scripts {
     <script>
-        let currentDate = "@selectedDate";
-        let activeMealType = "Breakfast";
-        let selectedFood = null;
+        let currentDateStr = "@selectedDate";
         let searchTimeout = null;
 
         document.addEventListener("DOMContentLoaded", function () {
-            loadSummary();
-
-            // Date picker listener
-            const dateInput = document.getElementById("logDateInput");
-            dateInput.addEventListener("change", function () {
-                currentDate = this.value;
-                loadSummary();
-            });
-
-            document.getElementById("todayBtn").addEventListener("click", function () {
-                currentDate = new Date().toISOString().split('T')[0];
-                dateInput.value = currentDate;
-                loadSummary();
-            });
-
-            document.getElementById("prevDayBtn").addEventListener("click", function () {
-                changeDate(-1);
-            });
-
-            document.getElementById("nextDayBtn").addEventListener("click", function () {
-                changeDate(1);
-            });
-
-            // Food search in modal
-            document.getElementById("modalFoodSearch").addEventListener("input", function (e) {
-                clearTimeout(searchTimeout);
-                const q = e.target.value.trim();
-                searchTimeout = setTimeout(() => searchModalFoods(q), 250);
-            });
-
-            // Confirm Add Food
-            document.getElementById("confirmAddFoodBtn").addEventListener("click", addFoodToMeal);
+            loadTimelineData(currentDateStr);
         });
 
-        function changeDate(days) {
-            const d = new Date(currentDate);
-            d.setDate(d.getDate() + days);
-            currentDate = d.toISOString().split('T')[0];
-            document.getElementById("logDateInput").value = currentDate;
-            loadSummary();
+        function onDateChanged(newDate) {
+            if (!newDate) return;
+            currentDateStr = newDate;
+            loadTimelineData(currentDateStr);
         }
 
-        // Tải toàn bộ dữ liệu nhật ký ngày hiện tại qua REST API
-        async function loadSummary() {
+        function navigateDay(offsetDays) {
+            const date = new Date(currentDateStr);
+            date.setDate(date.getDate() + offsetDays);
+            currentDateStr = date.toISOString().split('T')[0];
+            document.getElementById('hiddenDatePicker').value = currentDateStr;
+            loadTimelineData(currentDateStr);
+        }
+
+        async function loadTimelineData(dateStr) {
+            const container = document.getElementById("timelineList");
+            container.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <div class="spinner-border text-success" role="status"></div>
+                    <div class="small mt-2">Đang tải nhật ký...</div>
+                </div>`;
+
             try {
-                const res = await fetch(`/api/dailylogapi/summary?date=${currentDate}`);
-                if (!res.ok) {
-                    if (res.status === 401) window.location.href = "/Account/Login";
+                const res = await fetch(`/api/dailylogapi/summary?date=${dateStr}`);
+                const data = await res.json();
+
+                if (!data.success) {
+                    toastr.error("Không thể tải nhật ký ngày đã chọn.");
                     return;
                 }
-                const data = await res.json();
-                if (!data.success) return;
 
-                // Cập nhật Header tiến trình
-                document.getElementById("consumedCalories").textContent = data.totalConsumedCalories;
-                document.getElementById("targetCalories").textContent = data.targetDailyCalories;
-                
-                const remEl = document.getElementById("remainingCalories");
-                remEl.textContent = data.remainingCalories;
-                remEl.className = data.remainingCalories >= 0 ? "display-6 fw-extrabold my-1 text-success" : "display-6 fw-extrabold my-1 text-danger";
+                // Cập nhật text ngày hiển thị
+                const dateObj = new Date(dateStr + "T00:00:00");
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
 
-                document.getElementById("calorieProgressText").textContent = `${data.progressPercent}%`;
-
-                // Cập nhật Vòng tròn Calo SVG (Wao Circular Gauge)
-                const circleProgress = document.getElementById("waoCircleProgress");
-                if (circleProgress) {
-                    const circumference = 439.82; // 2 * PI * 70
-                    const percent = Math.min(100, Math.max(0, data.progressPercent));
-                    const offset = circumference - (percent / 100) * circumference;
-                    circleProgress.style.strokeDashoffset = offset;
-
-                    if (data.progressPercent > 100) {
-                        circleProgress.style.stroke = "#ef4444"; // Đỏ (Vượt)
-                    } else if (data.progressPercent >= 85) {
-                        circleProgress.style.stroke = "#f59e0b"; // Vàng (Sắp đủ)
-                    } else {
-                        circleProgress.style.stroke = "#10b981"; // Xanh (Lý tưởng)
-                    }
-                }
-
-                // Cập nhật 3 thanh Macro đa lượng (Carb, Protein, Fat)
-                document.getElementById("totalProtein").textContent = `${data.totalProtein}g`;
-                document.getElementById("totalCarbs").textContent = `${data.totalCarbs}g`;
-                document.getElementById("totalFat").textContent = `${data.totalFat}g`;
-
-                // Mục tiêu ước tính theo chuẩn 50% Carb - 25% Protein - 25% Fat
-                const carbTarget = Math.round((data.targetDailyCalories * 0.50) / 4);
-                const proteinTarget = Math.round((data.targetDailyCalories * 0.25) / 4);
-                const fatTarget = Math.round((data.targetDailyCalories * 0.25) / 9);
-
-                document.getElementById("carbTargetText").textContent = `/ ${carbTarget}g`;
-                document.getElementById("proteinTargetText").textContent = `/ ${proteinTarget}g`;
-                document.getElementById("fatTargetText").textContent = `/ ${fatTarget}g`;
-
-                const carbPct = carbTarget > 0 ? Math.min(100, Math.round((data.totalCarbs / carbTarget) * 100)) : 0;
-                const proteinPct = proteinTarget > 0 ? Math.min(100, Math.round((data.totalProtein / proteinTarget) * 100)) : 0;
-                const fatPct = fatTarget > 0 ? Math.min(100, Math.round((data.totalFat / fatTarget) * 100)) : 0;
-
-                document.getElementById("carbProgressBar").style.width = `${carbPct}%`;
-                document.getElementById("proteinProgressBar").style.width = `${proteinPct}%`;
-                document.getElementById("fatProgressBar").style.width = `${fatPct}%`;
-
-                // Cảnh báo Đỏ (Gamification)
-                const alertEl = document.getElementById("redRatioAlert");
-                if (data.isRedWarning) {
-                    alertEl.classList.remove("d-none");
-                    alertEl.classList.add("pulse-warning");
+                let dateTitle = "";
+                if (dateObj.getTime() === todayObj.getTime()) {
+                    dateTitle = `Hôm nay, ${dateObj.getDate()} Thg ${dateObj.getMonth() + 1}`;
                 } else {
-                    alertEl.classList.add("d-none");
-                    alertEl.classList.remove("pulse-warning");
+                    const daysOfWeek = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+                    dateTitle = `${daysOfWeek[dateObj.getDay()]}, ${dateObj.getDate()} Thg ${dateObj.getMonth() + 1}`;
                 }
+                document.getElementById("displayDateText").innerText = dateTitle;
+                document.getElementById("calendarYearLabel").innerText = `Lịch ${dateObj.getFullYear()}`;
 
-                // Render 4 Bữa Ăn
-                renderMeals(data.meals);
+                // Render Timeline Slots
+                container.innerHTML = "";
+                data.meals.forEach(slot => {
+                    const hasItems = slot.items && slot.items.length > 0;
+                    const isPreWorkout = slot.mealType === 'PreWorkout';
+                    const slotDiv = document.createElement("div");
+                    slotDiv.className = `timeline-slot d-flex align-items-start ${hasItems ? 'has-items' : ''}`;
 
-            } catch (err) {
-                toastr.error("Lỗi khi tải dữ liệu nhật ký.");
-            }
-        }
-
-        function renderMeals(meals) {
-            const container = document.getElementById("mealsContainer");
-            container.innerHTML = "";
-
-            const mealEmojis = {
-                "Breakfast": "🍳",
-                "Lunch": "🍲",
-                "Dinner": "🥗",
-                "Snack": "🍎"
-            };
-
-            meals.forEach(m => {
-                let tlBadge = "badge-tl-green";
-                let tlText = "🟢 Xanh";
-                if (m.mealTrafficLightDynamic === "YELLOW") {
-                    tlBadge = "badge-tl-yellow";
-                    tlText = "🟡 Vàng";
-                } else if (m.mealTrafficLightDynamic === "RED") {
-                    tlBadge = "badge-tl-red";
-                    tlText = "🔴 Đỏ";
-                }
-
-                let itemsHtml = "";
-                if (m.items.length === 0) {
-                    itemsHtml = `
-                        <div class="text-center py-4 text-muted small">
-                            <span class="fs-4 d-block mb-1 opacity-50">${mealEmojis[m.mealType] || '🍽️'}</span>
-                            Chưa có món ăn nào trong bữa này.
-                        </div>
-                    `;
-                } else {
-                    itemsHtml = `<div class="d-flex flex-column gap-1">`;
-                    m.items.forEach(item => {
-                        let staticDot = item.foodStaticLight === "GREEN" ? "🟢" : (item.foodStaticLight === "YELLOW" ? "🟡" : "🔴");
-                        itemsHtml += `
-                            <div class="meal-food-item d-flex justify-content-between align-items-center">
-                                <div class="me-2">
-                                    <div class="fw-semibold small text-dark">
-                                        ${staticDot} ${item.foodName}
-                                        ${item.isAiEstimated ? '<span class="badge bg-warning-subtle text-warning small ms-1" style="font-size: 0.65rem;">AI Scan</span>' : ''}
-                                    </div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">
-                                        ${item.quantity} x ${item.servingSize} &bull; <span class="text-primary">P:${item.calculatedProtein}g</span> &bull; <span class="text-warning-emphasis">C:${item.calculatedCarbs}g</span> &bull; <span class="text-danger">F:${item.calculatedFat}g</span>
-                                    </div>
+                    if (!hasItems) {
+                        // Slot Trống: Thanh bo góc nhẹ có nút +
+                        slotDiv.innerHTML = `
+                            <div class="timeline-node-dot mt-2"></div>
+                            <div class="timeline-empty-card flex-grow-1 d-flex justify-content-between align-items-center" onclick="openAddMealModal('${slot.mealType}', '${slot.mealName}')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="timeline-hour-badge" style="font-size: 0.85rem;">${slot.mealTime}</span>
+                                    <span class="text-muted fw-semibold small">${slot.mealName}</span>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-bold small text-dark">${item.calculatedCalories} kcal</span>
-                                    <button class="btn btn-sm btn-link text-danger p-0" onclick="removeItem(${item.id})" title="Xóa món">
-                                        <i class="bi bi-trash"></i>
+                                    ${isPreWorkout ? `
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0 fw-bold" style="font-size: 0.72rem;" onclick="event.stopPropagation(); openWorkoutModal();">
+                                            🔥 Tính calo tập
+                                        </button>
+                                    ` : ''}
+                                    <button type="button" class="btn btn-sm btn-light border rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 28px; height: 28px;">
+                                        <i class="bi bi-plus text-muted fs-6"></i>
                                     </button>
                                 </div>
                             </div>
                         `;
-                    });
-                    itemsHtml += `</div>`;
-                }
-
-                const cardHtml = `
-                    <div class="col-md-6">
-                        <div class="meal-section-card h-100 d-flex flex-column justify-content-between">
-                            <div>
-                                <div class="meal-header d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="fs-4">${mealEmojis[m.mealType] || '🍽️'}</span>
-                                        <div>
-                                            <h5 class="fw-bold mb-0 text-dark">${m.mealName}</h5>
-                                            <span class="small text-muted fw-semibold">${m.mealCalories} kcal</span>
-                                        </div>
+                    } else {
+                        // Slot Đã Ghi: Card mở rộng chi tiết đúng theo Screenshot 2
+                        let foodItemsHtml = "";
+                        slot.items.forEach(item => {
+                            foodItemsHtml += `
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="text-muted">&bull;</span>
+                                        <strong class="text-dark small">${item.foodName}</strong>
+                                        <span class="text-muted small">(${item.servingSize})</span>
                                     </div>
-                                    <span class="badge ${tlBadge} px-3 py-1 rounded-pill small">${tlText}</span>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="fw-bold text-dark small">${item.calculatedCalories} cal</span>
+                                        <button class="btn btn-sm p-0 text-muted border-0 hover-danger" onclick="deleteLogItem(${item.id})" title="Xóa món">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        slotDiv.innerHTML = `
+                            <div class="timeline-node-dot mt-3"></div>
+                            <div class="timeline-filled-card flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-extrabold text-dark" style="font-size: 0.95rem;">${slot.mealTime}</span>
+                                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">${slot.mealName}</span>
+                                        </div>
+                                        <span class="text-muted small" style="font-size: 0.75rem;">${slot.items.length} món ăn đã nạp</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="display-6 fw-extrabold text-dark d-block" style="font-size: 1.45rem; line-height: 1;">${slot.mealCalories}</span>
+                                        <span class="text-muted small" style="font-size: 0.7rem;">Kcal</span>
+                                    </div>
                                 </div>
 
-                                <div class="meal-body">
-                                    ${itemsHtml}
+                                <div class="border-top pt-2 mt-2">
+                                    ${foodItemsHtml}
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                    <div class="timeline-macro-pill">
+                                        Đạm: <strong class="text-danger">${slot.protein}g</strong> &bull; 
+                                        Carb: <strong class="text-warning">${slot.carbs}g</strong> &bull; 
+                                        Béo: <strong class="text-dark">${slot.fat}g</strong>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        ${isPreWorkout ? `
+                                            <button class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3 py-1" style="font-size: 0.75rem;" onclick="openWorkoutModal()">
+                                                🔥 Tính calo tập
+                                            </button>
+                                        ` : ''}
+                                        <button class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3 py-1" style="font-size: 0.75rem;" onclick="openAddMealModal('${slot.mealType}', '${slot.mealName}')">
+                                            + Thêm món
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                        `;
+                    }
+                    container.appendChild(slotDiv);
+                });
 
-                            <div class="p-3 pt-0">
-                                <button class="btn btn-sm btn-outline-success w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-1 shadow-sm" 
-                                        onclick="openAddModal('${m.mealType}', '${m.mealName}')">
-                                    <i class="bi bi-plus-lg"></i> Thêm món vào ${m.mealName}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML("beforeend", cardHtml);
-            });
+            } catch (err) {
+                console.error(err);
+                toastr.error("Lỗi kết nối khi tải nhật ký.");
+            }
         }
 
-        // Mở modal thêm món
-        function openAddModal(mealType, mealName) {
-            activeMealType = mealType;
-            document.getElementById("modalMealSubtitle").textContent = `Đang thêm món cho: ${mealName}`;
-            document.getElementById("modalFoodSearch").value = "";
-            document.getElementById("selectedFoodSection").classList.add("d-none");
-            document.getElementById("confirmAddFoodBtn").disabled = true;
-            selectedFood = null;
-            searchModalFoods("");
-            new bootstrap.Modal(document.getElementById("addMealItemModal")).show();
-        }
-
-        // Tìm món trong modal
-        async function searchModalFoods(q) {
-            const listEl = document.getElementById("modalFoodList");
-            listEl.innerHTML = `<div class="text-center py-3 text-muted small"><div class="spinner-border spinner-border-sm text-success me-1"></div>Đang tìm...</div>`;
-
+        async function deleteLogItem(itemId) {
+            if (!confirm("Bạn có chắc chắn muốn xóa món này khỏi bữa ăn?")) return;
             try {
-                const res = await fetch(`/api/foodapi/search?query=${encodeURIComponent(q)}&pageSize=8`);
-                const data = await res.json();
+                const res = await fetch(`/api/dailylogapi/delete-item/${itemId}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.success) {
+                    toastr.success(result.message);
+                    loadTimelineData(currentDateStr);
+                } else {
+                    toastr.error(result.message || "Không thể xóa món.");
+                }
+            } catch (err) {
+                toastr.error("Lỗi kết nối máy chủ.");
+            }
+        }
 
-                if (!data.success || data.items.length === 0) {
-                    listEl.innerHTML = `<div class="text-center py-3 text-muted small">Không tìm thấy món ăn nào.</div>`;
+        function openAddMealModal(mealType, mealName) {
+            document.getElementById("modalMealType").value = mealType;
+            document.getElementById("addMealModalLabel").innerText = `Ghi món vào: ${mealName}`;
+            document.getElementById("foodSearchInput").value = "";
+            document.getElementById("selectedFoodCard").classList.add("d-none");
+            document.getElementById("selectedFoodId").value = "";
+            document.getElementById("foodQuantityInput").value = "1.0";
+            searchFood("");
+            new bootstrap.Modal(document.getElementById("addMealModal")).show();
+        }
+
+        function debounceFoodSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = document.getElementById("foodSearchInput").value;
+                searchFood(query);
+            }, 300);
+        }
+
+        async function searchFood(query) {
+            const resultsContainer = document.getElementById("foodSearchResults");
+            resultsContainer.innerHTML = `<div class="p-2 text-center text-muted small"><div class="spinner-border spinner-border-sm"></div></div>`;
+            try {
+                const res = await fetch(`/api/foodapi/search?query=${encodeURIComponent(query)}&pageSize=6`);
+                const data = await res.json();
+                resultsContainer.innerHTML = "";
+                if (!data.items || data.items.length === 0) {
+                    resultsContainer.innerHTML = `<div class="p-2 text-center text-muted small">Không tìm thấy món ăn phù hợp.</div>`;
                     return;
                 }
 
-                listEl.innerHTML = "";
-                data.items.forEach(f => {
-                    let dot = f.trafficLightStatic === "GREEN" ? "🟢" : (f.trafficLightStatic === "YELLOW" ? "🟡" : "🔴");
-                    const itemDiv = document.createElement("div");
-                    itemDiv.className = "p-2 rounded-2 border-bottom d-flex justify-content-between align-items-center modal-food-row cursor-pointer";
-                    itemDiv.style.cursor = "pointer";
-                    itemDiv.innerHTML = `
+                data.items.forEach(food => {
+                    const a = document.createElement("a");
+                    a.href = "javascript:void(0)";
+                    a.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2";
+                    a.innerHTML = `
                         <div>
-                            <div class="fw-semibold small">${dot} ${f.name}</div>
-                            <div class="small text-muted" style="font-size: 0.75rem;">${f.servingSize} &bull; P:${f.protein}g C:${f.carbs}g F:${f.fat}g</div>
+                            <span class="fw-bold text-dark small">${food.name}</span>
+                            <span class="text-muted d-block" style="font-size: 0.72rem;">${food.servingSize} &bull; ${food.calories} kcal (Đạm: ${food.protein}g)</span>
                         </div>
-                        <span class="badge bg-light text-dark fw-bold">${f.calories} kcal</span>
+                        <span class="badge ${food.badgeClass} rounded-pill px-2">${food.trafficLight}</span>
                     `;
-                    itemDiv.onclick = () => selectFoodForModal(f);
-                    listEl.appendChild(itemDiv);
+                    a.onclick = () => selectFood(food);
+                    resultsContainer.appendChild(a);
                 });
             } catch (err) {
-                listEl.innerHTML = `<div class="text-danger small text-center py-2">Lỗi tải dữ liệu món ăn</div>`;
+                resultsContainer.innerHTML = `<div class="p-2 text-danger small">Lỗi tải dữ liệu.</div>`;
             }
         }
 
-        function selectFoodForModal(food) {
-            selectedFood = food;
-            document.getElementById("selectedFoodSection").classList.remove("d-none");
-            document.getElementById("selectedFoodName").textContent = food.name;
-            document.getElementById("selectedFoodServing").textContent = food.servingSize;
-            document.getElementById("selectedFoodCalories").textContent = `${food.calories} kcal`;
-            document.getElementById("itemQuantityInput").value = "1.0";
-            document.getElementById("confirmAddFoodBtn").disabled = false;
+        function selectFood(food) {
+            document.getElementById("selectedFoodId").value = food.id;
+            document.getElementById("selectedFoodName").innerText = food.name;
+            document.getElementById("selectedFoodMeta").innerText = `${food.servingSize} &bull; ${food.calories} cal | P: ${food.protein}g - C: ${food.carbs}g - F: ${food.fat}g`;
+            document.getElementById("selectedFoodCard").classList.remove("d-none");
+            document.getElementById("foodServingUnit").innerText = food.servingSize;
         }
 
-        function adjustQuantity(delta) {
-            const input = document.getElementById("itemQuantityInput");
-            let val = parseFloat(input.value) || 1.0;
-            val = Math.max(0.1, Math.min(20, val + delta));
-            input.value = val.toFixed(1);
-            if (selectedFood) {
-                document.getElementById("selectedFoodCalories").textContent = `${Math.round(selectedFood.calories * val)} kcal`;
+        async function submitAddFoodToMeal() {
+            const foodId = parseInt(document.getElementById("selectedFoodId").value);
+            const mealType = document.getElementById("modalMealType").value;
+            const quantity = parseFloat(document.getElementById("foodQuantityInput").value) || 1.0;
+
+            if (!foodId) {
+                toastr.warning("Vui lòng chọn 1 món ăn từ danh sách tìm kiếm!");
+                return;
             }
-        }
-
-        // Gửi AJAX POST thêm món
-        async function addFoodToMeal() {
-            if (!selectedFood) return;
-            const qty = parseFloat(document.getElementById("itemQuantityInput").value) || 1.0;
-
-            const payload = {
-                date: currentDate,
-                mealType: activeMealType,
-                foodId: selectedFood.Id || selectedFood.id,
-                quantity: qty,
-                isAiEstimated: false
-            };
 
             try {
-                const res = await fetch("/api/dailylogapi/add-item", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                const res = await fetch('/api/dailylogapi/add-item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: currentDateStr,
+                        mealType: mealType,
+                        foodId: foodId,
+                        quantity: quantity
+                    })
                 });
 
-                if (res.ok) {
-                    toastr.success(`Đã thêm ${selectedFood.name || selectedFood.Name}!`);
-                    bootstrap.Modal.getInstance(document.getElementById("addMealItemModal")).hide();
-                    loadSummary();
+                const result = await res.json();
+                if (result.success) {
+                    toastr.success(result.message);
+                    bootstrap.Modal.getInstance(document.getElementById("addMealModal")).hide();
+                    loadTimelineData(currentDateStr);
                 } else {
-                    toastr.error("Không thể thêm món ăn.");
+                    toastr.error(result.message || "Không thể thêm món ăn.");
                 }
             } catch (err) {
-                toastr.error("Lỗi kết nối máy chủ.");
-            }
-        }
-
-        // Gửi AJAX DELETE xóa món
-        async function removeItem(logItemId) {
-            if (!confirm("Bạn có chắc muốn xóa món này khỏi bữa ăn?")) return;
-
-            try {
-                const res = await fetch(`/api/dailylogapi/remove-item/${logItemId}`, {
-                    method: "DELETE"
-                });
-
-                if (res.ok) {
-                    toastr.info("Đã xóa món ăn khỏi bữa.");
-                    loadSummary();
-                } else {
-                    toastr.error("Không thể xóa món ăn.");
-                }
-            } catch (err) {
-                toastr.error("Lỗi kết nối máy chủ.");
+                toastr.error("Lỗi kết nối khi thêm món.");
             }
         }
     </script>

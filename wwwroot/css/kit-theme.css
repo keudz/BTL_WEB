@@ -3,38 +3,49 @@
 @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
 
 :root {
-    --kit-primary: #10b981;
-    --kit-primary-hover: #059669;
-    --kit-primary-light: #ecfdf5;
-    --kit-dark: #0f172a;
-    --kit-slate: #334155;
-    --kit-gray-bg: #f8fafc;
-    --kit-border: #e2e8f0;
-    
+    --kit-primary: #1e3f20;
+    --kit-primary-hover: #163218;
+    --kit-primary-light: #e8f0e9;
+    --kit-accent-green: #2d6a4f;
+    --kit-accent-gold: #d97706;
+    --kit-dark: #1b261c;
+    --kit-slate: #475569;
+    --kit-cream-bg: #fbf9f4;
+    --kit-card-bg: #ffffff;
+    --kit-border: #ede8df;
+
     /* Traffic-Light Gamification Tokens */
     --kit-traffic-green: #10b981;
     --kit-traffic-green-bg: #d1fae5;
     --kit-traffic-green-text: #065f46;
-    
+
     --kit-traffic-yellow: #f59e0b;
     --kit-traffic-yellow-bg: #fef3c7;
     --kit-traffic-yellow-text: #92400e;
-    
+
     --kit-traffic-red: #ef4444;
     --kit-traffic-red-bg: #fee2e2;
     --kit-traffic-red-text: #991b1b;
 }
 
 body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: var(--kit-gray-bg);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--kit-cream-bg);
     color: var(--kit-dark);
     min-height: 100vh;
 }
 
+/* KIT Standard Card */
+.kit-card {
+    background-color: var(--kit-card-bg);
+    border: 1px solid var(--kit-border);
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
 /* Navbar */
 .kit-navbar {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(251, 249, 244, 0.95);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--kit-border);
     transition: all 0.3s ease;
@@ -53,14 +64,155 @@ body {
 .kit-nav-link {
     font-weight: 600;
     color: var(--kit-slate) !important;
-    padding: 0.5rem 0.9rem !important;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+    padding: 0.55rem 1rem !important;
+    border-radius: 14px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
 }
 
-.kit-nav-link:hover, .kit-nav-link.active {
+.kit-nav-link:hover:not(.active) {
     color: var(--kit-primary) !important;
     background-color: var(--kit-primary-light);
+    transform: translateY(-1px);
+}
+
+/* Nổi bật rõ rệt khi đang ở trang hiện tại */
+.kit-nav-link.active {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #1e3f20 0%, #2d6a4f 100%) !important;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(30, 63, 32, 0.3);
+    transform: translateY(-1px);
+}
+
+.kit-nav-link.active i {
+    color: #ffffff !important;
+}
+
+.kit-nav-link.active .badge {
+    background-color: #ffffff !important;
+    color: var(--kit-primary) !important;
+    font-weight: 800;
+}
+
+/* Thanh taskbar đáy màn hình cho Mobile (d-lg-none) */
+.kit-bottom-taskbar {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(16px);
+    border-top: 1px solid #ebe5d8 !important;
+    z-index: 1040;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04) !important;
+    padding-bottom: env(safe-area-inset-bottom, 6px);
+}
+
+.kit-taskbar-item {
+    flex: 1;
+    color: #8c9ba5;
+    text-decoration: none;
+    padding: 8px 4px 6px 4px;
+    border-radius: 14px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.kit-taskbar-item:hover {
+    color: var(--kit-primary);
+}
+
+.kit-taskbar-item.active {
+    color: var(--kit-primary) !important;
+    font-weight: 800;
+}
+
+.kit-taskbar-item.active i,
+.kit-taskbar-item.active svg {
+    color: var(--kit-primary) !important;
+    transform: scale(1.1);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Center Elevated AI Scan Button */
+.kit-center-btn {
+    width: 52px;
+    height: 52px;
+    background: radial-gradient(circle at 35% 35%, #2d5a32 0%, #17321a 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -22px auto 2px auto;
+    border: 4px solid var(--kit-cream-bg);
+    box-shadow: 0 6px 18px rgba(23, 50, 26, 0.4);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.kit-center-btn i,
+.kit-center-btn span {
+    color: #f59e0b !important;
+    /* Gold sparkle */
+    font-size: 1.45rem;
+}
+
+.kit-taskbar-item.kit-taskbar-center.active .kit-center-btn {
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(23, 50, 26, 0.55);
+}
+
+/* Custom Schema Components */
+.timeline-hour-badge {
+    font-weight: 800;
+    color: #1e3f20;
+    min-width: 55px;
+}
+
+.fridge-food-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #ebe5d8;
+    border-left: 5px solid #10b981;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fridge-food-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+.btn-soft-use {
+    background-color: #eaf3ed;
+    color: #1e3f20;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 14px;
+}
+
+.btn-soft-use:hover {
+    background-color: #d8eada;
+    color: #163218;
+}
+
+.btn-swap-compartment {
+    background-color: #e6f7f5;
+    color: #0d9488;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 10px;
+}
+
+.btn-swap-compartment:hover {
+    background-color: #ccefe9;
+}
+
+@media (max-width: 991.98px) {
+    body.has-bottom-taskbar {
+        padding-bottom: 84px;
+    }
 }
 
 /* Badges */
@@ -280,16 +432,24 @@ body {
     position: relative;
     border: 2px solid transparent;
     background: linear-gradient(#fff, #fff) padding-box,
-                linear-gradient(135deg, #10b981, #f59e0b, #6366f1) border-box;
+        linear-gradient(135deg, #10b981, #f59e0b, #6366f1) border-box;
 }
 
 /* Pulse animation for red ratio warning */
 @keyframes softPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.01); opacity: 0.95; }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.01);
+        opacity: 0.95;
+    }
 }
 
 .pulse-warning {
     animation: softPulse 2.5s infinite ease-in-out;
 }
-

@@ -1,0 +1,347 @@
+<!-- Modal Tính & Ghi Nhận Calo Đốt Được (Workout Calorie Burn Calculator) -->
+<div class="modal fade" id="workoutCalculatorModal" tabindex="-1" aria-labelledby="workoutCalculatorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg" style="background-color: #fbf9f4;">
+            <div class="modal-header border-0 pb-1">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #fee2e2; color: #dc2626;">
+                        <i class="bi bi-fire fs-5"></i>
+                    </span>
+                    <div>
+                        <h5 class="modal-title fw-extrabold text-dark mb-0" id="workoutCalculatorModalLabel">Tính Calo Đốt Được</h5>
+                        <div class="text-muted small" style="font-size: 0.75rem;">Chuẩn hóa theo chỉ số MET & thể trạng của bạn</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body pt-2">
+                <!-- Selected Sport Banner -->
+                <div class="p-3 rounded-4 mb-3 d-flex justify-content-between align-items-center border bg-white shadow-xs" style="border-color: #ede8df !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="activeSportIcon" class="display-6 mb-0" style="line-height: 1;">🏃</span>
+                        <div>
+                            <span class="text-muted small d-block" style="font-size: 0.72rem;">MÔN THỂ THAO ĐÃ CHỌN</span>
+                            <h6 id="activeSportName" class="fw-extrabold text-dark mb-0" style="font-size: 1.05rem;">Chạy bộ</h6>
+                        </div>
+                    </div>
+                    <span id="activeSportUnitDesc" class="badge bg-light text-muted border px-2 py-1 small">đo theo thời gian</span>
+                </div>
+
+                <!-- BƯỚC 1: Lưới 12 Môn Thể Thao -->
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark mb-2">1. Chọn môn thể thao:</label>
+                    <div class="row g-2" id="sportsGridContainer">
+                        <!-- Render 12 sports with icons -->
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card active w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('running', 'Chạy bộ', '🏃', 6.0, 8.5, 11.5, 'km/h')">
+                                <span class="fs-2 d-block">🏃</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Chạy bộ</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('cycling', 'Đạp xe', '🚴', 4.0, 7.0, 10.0, 'km/h')">
+                                <span class="fs-2 d-block">🚴</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Đạp xe</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('swimming', 'Bơi lội', '🏊', 5.0, 7.5, 10.5, 'bơi sải/ếch')">
+                                <span class="fs-2 d-block">🏊</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Bơi lội</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('jumping_rope', 'Nhảy dây', '🪢', 7.5, 10.0, 12.5, 'nhịp/phút')">
+                                <span class="fs-2 d-block">🪢</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Nhảy dây</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('gym', 'Gym & Tạ', '🏋️', 3.5, 5.5, 8.0, 'kháng lực')">
+                                <span class="fs-2 d-block">🏋️</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Gym & Tạ</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('walking', 'Đi bộ nhanh', '🚶', 2.8, 4.0, 5.5, 'bước chân')">
+                                <span class="fs-2 d-block">🚶</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Đi bộ nhanh</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('badminton', 'Cầu lông', '🏸', 4.5, 6.0, 8.5, 'giao lưu/đơn')">
+                                <span class="fs-2 d-block">🏸</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Cầu lông</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('football', 'Đá bóng', '⚽', 5.0, 7.5, 10.0, 'sân mini/lớn')">
+                                <span class="fs-2 d-block">⚽</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Đá bóng</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('basketball', 'Bóng rổ', '🏀', 4.5, 6.5, 9.0, 'ném rổ/đấu')">
+                                <span class="fs-2 d-block">🏀</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Bóng rổ</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('yoga', 'Yoga & Giãn cơ', '🧘', 2.5, 3.8, 5.0, 'thân tâm')">
+                                <span class="fs-2 d-block">🧘</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Yoga</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('boxing', 'Boxing & Võ', '🥊', 5.5, 7.8, 11.0, 'đối kháng')">
+                                <span class="fs-2 d-block">🥊</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Boxing</span>
+                            </button>
+                        </div>
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="button" class="sport-select-card w-100 p-2 text-center border-0 rounded-4 shadow-xs" onclick="selectSport('stair_climbing', 'Leo dốc/cầu thang', '🧗', 4.5, 7.5, 10.5, 'bậc thang')">
+                                <span class="fs-2 d-block">🧗</span>
+                                <span class="small fw-bold text-dark d-block text-truncate">Leo thang</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 2: Chọn Cường Độ Tập Luyện -->
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark mb-2">2. Chọn cường độ tập luyện:</label>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <button type="button" id="btnIntensityLight" class="btn btn-sm w-100 py-2 rounded-4 fw-bold border intensity-btn" onclick="setWorkoutIntensity('LIGHT')">
+                                🟢 Nhẹ<br><span class="text-muted fw-normal" style="font-size: 0.68rem;">Khởi động / Nhịp tim thấp</span>
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" id="btnIntensityModerate" class="btn btn-sm w-100 py-2 rounded-4 fw-bold border intensity-btn active" onclick="setWorkoutIntensity('MODERATE')">
+                                🟡 Vừa phải<br><span class="text-muted fw-normal" style="font-size: 0.68rem;">Đổ mồ hôi / Thở đều</span>
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" id="btnIntensityHigh" class="btn btn-sm w-100 py-2 rounded-4 fw-bold border intensity-btn" onclick="setWorkoutIntensity('HIGH')">
+                                🔴 Cường độ cao<br><span class="text-muted fw-normal" style="font-size: 0.68rem;">HIIT / Thở dốc / Thi đấu</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 3: Chọn Số Phút Tập Luyện -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold text-dark mb-0">3. Thời gian tập luyện:</label>
+                        <span class="fw-extrabold text-success fs-5"><span id="lblDurationMinutes">30</span> phút</span>
+                    </div>
+
+                    <!-- Slider -->
+                    <input type="range" class="form-range" id="workoutDurationSlider" min="5" max="180" step="5" value="30" oninput="onDurationSliderChange(this.value)" />
+
+                    <!-- Quick Preset Chips -->
+                    <div class="d-flex gap-2 flex-wrap mt-2">
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1 small fw-semibold" onclick="setPresetDuration(15)">15 phút</button>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1 small fw-semibold" onclick="setPresetDuration(30)">30 phút</button>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1 small fw-semibold" onclick="setPresetDuration(45)">45 phút</button>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1 small fw-semibold" onclick="setPresetDuration(60)">60 phút</button>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1 small fw-semibold" onclick="setPresetDuration(90)">90 phút</button>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 4: KẾT QUẢ CALO TIÊU HAO THEO THỜI GIAN THỰC -->
+                <div class="p-3 rounded-4 mb-3 text-center border" style="background: linear-gradient(135deg, #fff5ed 0%, #ffffff 100%); border-color: #fed7aa !important;">
+                    <div class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                        KẾT QUẢ CALO TIÊU HAO ƯỚC TÍNH
+                    </div>
+                    <div class="display-5 fw-extrabold my-1" style="color: #ea580c; line-height: 1.1;">
+                        🔥 <span id="valBurnedCalories">217</span> <span class="fs-5 text-muted fw-bold">kcal</span>
+                    </div>
+                    <div class="text-muted small" id="valFormulaExplanation" style="font-size: 0.75rem;">
+                        Chỉ số MET: 8.5 &bull; Thể trạng: 68 kg &bull; Thời gian: 30 phút
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button type="button" id="btnSubmitWorkout" class="btn btn-success w-100 py-3 rounded-4 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
+                        style="background-color: #1e3f20; border-color: #1e3f20; font-size: 0.95rem;" onclick="submitWorkoutLog()">
+                    <i class="bi bi-plus-circle-fill fs-5"></i>
+                    <span>+ Ghi nhận bài tập vào hôm nay</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sport-select-card {
+        background-color: #ffffff;
+        border: 2px solid #ede8df !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    .sport-select-card:hover {
+        border-color: #1e3f20 !important;
+        transform: translateY(-2px);
+    }
+
+    .sport-select-card.active {
+        border-color: #1e3f20 !important;
+        background-color: #eaf3ed !important;
+        box-shadow: 0 4px 12px rgba(30, 63, 32, 0.2) !important;
+        transform: translateY(-2px);
+    }
+
+    .intensity-btn {
+        background-color: #ffffff;
+        border-color: #ede8df !important;
+        color: #334155;
+        transition: all 0.2s ease;
+    }
+
+    .intensity-btn.active {
+        background-color: #1e3f20 !important;
+        color: #ffffff !important;
+        border-color: #1e3f20 !important;
+        box-shadow: 0 3px 10px rgba(30, 63, 32, 0.25);
+    }
+
+    .intensity-btn.active span {
+        color: #d1fae5 !important;
+    }
+</style>
+
+<script>
+    // State của Workout Calculator
+    let selectedSportKey = "running";
+    let selectedSportName = "Chạy bộ";
+    let selectedSportIcon = "🏃";
+    let currentIntensity = "MODERATE";
+    let currentDurationMinutes = 30;
+    let currentUserWeightKg = 68.0;
+
+    // MET values của môn đang chọn
+    let currentSportLightMET = 6.0;
+    let currentSportModerateMET = 8.5;
+    let currentSportHighMET = 11.5;
+
+    function openWorkoutModal() {
+        // Tải thể trạng user từ server nếu có
+        fetch('/api/workoutapi/sports')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.userWeight > 0) {
+                    currentUserWeightKg = data.userWeight;
+                }
+                updateLiveCalorieCalculation();
+            })
+            .catch(() => updateLiveCalorieCalculation());
+
+        new bootstrap.Modal(document.getElementById('workoutCalculatorModal')).show();
+    }
+
+    function selectSport(key, name, icon, lightMet, modMet, highMet, unitDesc) {
+        selectedSportKey = key;
+        selectedSportName = name;
+        selectedSportIcon = icon;
+        currentSportLightMET = lightMet;
+        currentSportModerateMET = modMet;
+        currentSportHighMET = highMet;
+
+        // Cập nhật giao diện thẻ chọn môn
+        document.querySelectorAll('.sport-select-card').forEach(c => c.classList.remove('active'));
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+
+        // Cập nhật banner
+        document.getElementById('activeSportIcon').innerText = icon;
+        document.getElementById('activeSportName').innerText = name;
+        document.getElementById('activeSportUnitDesc').innerText = unitDesc;
+
+        updateLiveCalorieCalculation();
+    }
+
+    function setWorkoutIntensity(level) {
+        currentIntensity = level;
+        document.querySelectorAll('.intensity-btn').forEach(b => b.classList.remove('active'));
+        if (level === 'LIGHT') document.getElementById('btnIntensityLight').classList.add('active');
+        if (level === 'MODERATE') document.getElementById('btnIntensityModerate').classList.add('active');
+        if (level === 'HIGH') document.getElementById('btnIntensityHigh').classList.add('active');
+
+        updateLiveCalorieCalculation();
+    }
+
+    function onDurationSliderChange(val) {
+        currentDurationMinutes = parseInt(val) || 30;
+        document.getElementById('lblDurationMinutes').innerText = currentDurationMinutes;
+        updateLiveCalorieCalculation();
+    }
+
+    function setPresetDuration(minutes) {
+        currentDurationMinutes = minutes;
+        document.getElementById('workoutDurationSlider').value = minutes;
+        document.getElementById('lblDurationMinutes').innerText = minutes;
+        updateLiveCalorieCalculation();
+    }
+
+    function updateLiveCalorieCalculation() {
+        let met = currentSportModerateMET;
+        if (currentIntensity === 'LIGHT') met = currentSportLightMET;
+        if (currentIntensity === 'HIGH') met = currentSportHighMET;
+
+        // Công thức chuẩn Y học thể thao: Calories = MET * Weight(kg) * (Minutes / 60)
+        const burned = Math.round(met * currentUserWeightKg * (currentDurationMinutes / 60.0));
+
+        document.getElementById('valBurnedCalories').innerText = burned;
+        document.getElementById('valFormulaExplanation').innerText = 
+            `Chỉ số MET: ${met} • Cân nặng: ${currentUserWeightKg} kg • Thời gian: ${currentDurationMinutes} phút`;
+    }
+
+    async function submitWorkoutLog() {
+        const btn = document.getElementById('btnSubmitWorkout');
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang ghi nhận...`;
+
+        try {
+            const res = await fetch('/api/workoutapi/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sportKey: selectedSportKey,
+                    intensity: currentIntensity,
+                    durationMinutes: currentDurationMinutes
+                })
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                toastr.success(result.message, "Đốt cháy Calo");
+                bootstrap.Modal.getInstance(document.getElementById('workoutCalculatorModal')).hide();
+
+                // Cập nhật số liệu hiển thị trên trang chủ ngay lập tức
+                const displayBurned = document.getElementById('displayBurnedCalories');
+                if (displayBurned) {
+                    displayBurned.innerText = `${result.totalBurnedToday} kcal`;
+                }
+
+                // Nếu đang ở trang có timeline thì reload timeline
+                if (typeof loadTimelineData === 'function' && typeof currentDateStr !== 'undefined') {
+                    loadTimelineData(currentDateStr);
+                } else {
+                    // Chờ 600ms rồi reload nhẹ để thấy số calo còn lại cập nhật
+                    setTimeout(() => window.location.reload(), 800);
+                }
+            } else {
+                toastr.error(result.message || "Không thể lưu bài tập.");
+            }
+        } catch (err) {
+            toastr.error("Lỗi kết nối khi lưu bài tập.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="bi bi-plus-circle-fill fs-5"></i><span>+ Ghi nhận bài tập vào hôm nay</span>`;
+        }
+    }
+</script>

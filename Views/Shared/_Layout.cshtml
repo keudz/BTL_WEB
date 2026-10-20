@@ -17,7 +17,12 @@
     
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+@{
+    var currentCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAct = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+}
+<body class="@(isAuthenticated ? "has-bottom-taskbar" : "")">
     <header class="sticky-top">
         <nav class="navbar navbar-expand-lg kit-navbar py-2 shadow-sm">
             <div class="container">
@@ -33,38 +38,38 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="kitNavbarContent">
-                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    @if (isAuthenticated)
                     {
                         <!-- Left Navigation (Chỉ hiển thị khi đã đăng nhập) -->
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
                             <li class="nav-item">
-                                <a class="nav-link kit-nav-link" asp-controller="Home" asp-action="Index">
+                                <a class="nav-link kit-nav-link @(currentCtrl.Equals("Home", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="Home" asp-action="Index">
                                     <i class="bi bi-house-door me-1"></i> Trang chủ
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link kit-nav-link" asp-controller="DailyLog" asp-action="Index">
+                                <a class="nav-link kit-nav-link @(currentCtrl.Equals("DailyLog", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="DailyLog" asp-action="Index">
                                     <i class="bi bi-journal-check me-1"></i> Nhật ký bữa ăn
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link kit-nav-link" asp-controller="Fridge" asp-action="Index">
-                                    <i class="bi bi-snow me-1"></i> Tủ lạnh ảo
+                                <a class="nav-link kit-nav-link @(currentCtrl.Equals("Fridge", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="Fridge" asp-action="Index">
+                                    <i class="bi bi-journal-bookmark me-1"></i> Bếp & Kho
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link kit-nav-link" asp-controller="Food" asp-action="Index">
+                                <a class="nav-link kit-nav-link @(currentCtrl.Equals("Food", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="Food" asp-action="Index">
                                     <i class="bi bi-search me-1"></i> Tra cứu món
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link kit-nav-link d-flex align-items-center" asp-controller="AiScanner" asp-action="Index">
-                                    <i class="bi bi-camera-fill me-1 text-warning"></i> Quét ảnh AI
+                                <a class="nav-link kit-nav-link d-flex align-items-center @(currentCtrl.Equals("AiScanner", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="AiScanner" asp-action="Index">
+                                    <i class="bi bi-camera-fill me-1"></i> Quét ảnh AI
                                     <span class="badge badge-role-pro ms-1 px-2 py-0" style="font-size: 0.65rem;">PRO</span>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link kit-nav-link" asp-controller="Reports" asp-action="Index">
+                                <a class="nav-link kit-nav-link @(currentCtrl.Equals("Reports", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="Reports" asp-action="Index">
                                     <i class="bi bi-graph-up-arrow me-1"></i> Báo cáo
                                 </a>
                             </li>
@@ -185,6 +190,39 @@
         </div>
     </footer>
 
+    @if (isAuthenticated)
+    {
+        <!-- Mobile Bottom Floating Taskbar / Navigation Dock (d-lg-none) -->
+        <nav class="kit-bottom-taskbar d-lg-none position-fixed bottom-0 start-0 end-0 bg-white border-top shadow-lg py-1 px-2 z-3">
+            <div class="d-flex justify-content-around align-items-center text-center">
+                <a class="kit-taskbar-item @(currentCtrl.Equals("Home", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-house-door fs-5 d-block"></i>
+                    <span class="small" style="font-size: 0.72rem;">Trang chủ</span>
+                </a>
+                <a class="kit-taskbar-item @(currentCtrl.Equals("DailyLog", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="DailyLog" asp-action="Index">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="d-block mx-auto mb-1"><path d="M18 2v20M18 8a3 3 0 0 1-3-3V2M6 2v7a3 3 0 0 0 3 3h0a3 3 0 0 0 3-3V2M9 12v10"/></svg>
+                    <span class="small" style="font-size: 0.72rem;">Nhật ký</span>
+                </a>
+                <a class="kit-taskbar-item kit-taskbar-center @(currentCtrl.Equals("AiScanner", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="AiScanner" asp-action="Index" title="Quét AI">
+                    <div class="kit-center-btn shadow">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                </a>
+                <a class="kit-taskbar-item @(currentCtrl.Equals("Fridge", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="Fridge" asp-action="Index">
+                    <i class="bi bi-journal-bookmark fs-5 d-block"></i>
+                    <span class="small" style="font-size: 0.72rem;">Bếp & Kho</span>
+                </a>
+                <a class="kit-taskbar-item @(currentCtrl.Equals("Account", StringComparison.OrdinalIgnoreCase) && currentAct.Equals("Profile", StringComparison.OrdinalIgnoreCase) ? "active" : "")" asp-controller="Account" asp-action="Profile">
+                    <i class="bi bi-person fs-5 d-block"></i>
+                    <span class="small" style="font-size: 0.72rem;">Cá nhân</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Workout Calorie Burn Calculator Modal (Available Globally) -->
+        <partial name="_WorkoutCalculatorModal" />
+    }
+
     <!-- Scripts: jQuery & Bootstrap 5 Bundle CDN -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -193,7 +231,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Toastr flash message listener -->
+    <!-- Toastr flash message listener & Instant Taskbar Active feedback -->
     <script>
         toastr.options = {
             "closeButton": true,
@@ -214,6 +252,14 @@
         {
             <text>toastr.info("@TempData["InfoMessage"]");</text>
         }
+
+        // Đổi màu ngay tức thì khi bấm vào bất kỳ nút nào trên taskbar/navbar
+        document.querySelectorAll('.kit-nav-link, .kit-taskbar-item').forEach(link => {
+            link.addEventListener('click', function () {
+                document.querySelectorAll('.kit-nav-link, .kit-taskbar-item').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
